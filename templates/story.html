@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Câu chuyện Sợi Mộc</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Be+Vietnam+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ====== RESET ====== */
+*{margin:0;padding:0;box-sizing:border-box;}
+body,html{height:100%;font-family:'Be Vietnam Pro',sans-serif;overflow-x:hidden;background:linear-gradient(180deg,#fefcf3,#f9f4ec);color:#1a1a1a;}
+
+/* ====== NAV ====== */
+.nav{
+  position:sticky;top:0;z-index:1000;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 2rem;
+  background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(45,90,39,0.1);
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:#2D5A27;}
+.nav-right{display:flex;gap:10px;align-items:center;}
+.nav-btn{background:#2D5A27;color:#fff;padding:0.6rem 1.2rem;border-radius:999px;text-decoration:none;font-weight:600;transition:0.3s;font-size:0.9rem;}
+.nav-btn:hover{transform:translateY(-2px);opacity:0.9;}
+
+/* ====== HERO ====== */
+.hero{text-align:center;padding:4rem 1.5rem 2rem;}
+.hero h1{font-family:'Playfair Display',serif;font-size:3rem;color:#2D5A27;}
+.badge{display:inline-block;margin-bottom:1rem;padding:0.4rem 1rem;border-radius:999px;background:#eaf3de;color:#2D5A27;font-weight:600;}
+
+/* ====== STORY ====== */
+.container{max-width:900px;margin:auto;padding:2rem 1.5rem 4rem;}
+.story{background:#fff;border-radius:24px;padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.08);}
+.story p{opacity:0;transform:translateY(20px);transition:all 0.6s ease;line-height:1.8;margin-bottom:1.2rem;}
+.story p.show{opacity:1;transform:translateY(0);}
+.story strong{color:#2D5A27;}
+
+/* highlight */
+.highlight{margin-top:2rem;padding:1.5rem;border-left:4px solid #2D5A27;background:#f4f8f2;border-radius:12px;opacity:0;transform:translateY(20px);transition:all 0.8s ease;font-weight:600;color:#2D5A27;}
+.highlight.show{opacity:1;transform:translateY(0);}
+
+/* CTA */
+.cta{text-align:center;margin-top:3rem;}
+.cta a{display:inline-block;margin-top:1rem;padding:1rem 2.5rem;border-radius:999px;background:linear-gradient(135deg,#ffd86b,#ffb300);color:#2D5A27;font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(255,179,0,0.25);transition:0.3s;}
+.cta a:hover{transform:scale(1.05);}
+
+/* BACK HOME BUTTON */
+.back-home{position:fixed;bottom:28px;left:28px;background:#fff;color:#2D5A27;padding:0.7rem 1.2rem;border-radius:999px;text-decoration:none;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,0.15);z-index:2000;transition:0.3s;}
+.back-home:hover{transform:translateY(-3px);background:#2D5A27;color:#fff;}
+
+/* CORN PARTICLES */
+.corn{position:absolute;width:6px;height:6px;background:rgba(255,215,0,0.6);border-radius:50%;animation:fall linear infinite;filter:blur(0.3px);}
+@keyframes fall{0%{transform:translateY(-50px);}100%{transform:translateY(110vh);}}
+
+/* RESPONSIVE */
+@media(max-width:768px){.hero h1{font-size:2rem;}.story{padding:1.5rem;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="logo">Sợi Mộc</div>
+  <div class="nav-right">
+    <a class="nav-btn" href="{{ url_for('home') }}">⬅ Trang chủ</a>
+    <a class="nav-btn" href="https://zalo.me/0979862956" target="_blank">Đặt hàng</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">🌿 Câu chuyện thương hiệu</div>
+  <h1>Câu chuyện Sợi Mộc</h1>
+</div>
+
+<!-- STORY -->
+<div class="container">
+  <div class="story">
+
+    <p class="typewriter">Có một điều rất đơn giản nhưng lại bị bỏ quên trong những bữa ăn hằng ngày: <strong>món ăn càng “tiện” thì càng xa tự nhiên.</strong></p>
+    <p class="typewriter">Sợi Mộc ra đời từ chính câu hỏi đó.</p>
+    <p class="typewriter">Chúng tôi bắt đầu từ hạt ngô vùng cao Tây Bắc – nơi đất đai còn nguyên sơ, nơi người nông dân vẫn gieo trồng theo cách truyền thống.</p>
+    <p class="typewriter"><strong>Không phẩm màu – không hương liệu – không chất bảo quản.</strong></p>
+    <p class="typewriter">Nhưng chỉ “sạch” thôi thì chưa đủ. Sợi phở phải ngon, phải dễ ăn, phải khiến người ta muốn ăn lại lần nữa.</p>
+    <p class="typewriter">Sau nhiều lần thử nghiệm, chúng tôi tìm ra sợi phở từ ngô có độ dai vừa phải, thơm nhẹ tự nhiên.</p>
+    <p class="typewriter">Ngày ra mắt, chúng tôi chỉ mong vài người thử. Nhưng họ quay lại. Và giới thiệu cho người thân.</p>
+
+    <div class="highlight typewriter">
+      Và đó là lúc Sợi Mộc hiểu rằng: một món ăn tử tế sẽ tự tìm được người yêu nó.
+    </div>
+
+    <div class="cta">
+      <p>👉 Trải nghiệm ngay hương vị tự nhiên</p>
+      <a href="https://zalo.me/0123456789" target="_blank">Đặt hàng ngay</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- BACK HOME BUTTON -->
+<a class="back-home" href="{{ url_for('home') }}">⬅ Quay về trang chủ</a>
+
+<!-- SCRIPT -->
+<script>
+// TYPEWRITER EFFECT
+const paragraphs = document.querySelectorAll('.typewriter');
+paragraphs.forEach((p,i)=>{
+  const html = p.innerHTML;
+  setTimeout(()=>{
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const nodes = Array.from(temp.childNodes);
+    p.innerHTML='';
+    let index=0;
+
+    function typeNode(){
+      if(index>=nodes.length) return;
+      const node = nodes[index].cloneNode(true);
+      if(node.nodeType===3){
+        let text=node.textContent,j=0;
+        const interval=setInterval(()=>{
+          p.innerHTML+=text[j];
+          j++;
+          if(j>=text.length){
+            clearInterval(interval);
+            index++;
+            typeNode();
+          }
+        },15);
+      } else {
+        p.appendChild(node);
+        index++;
+        setTimeout(typeNode,50);
+      }
+    }
+    typeNode();
+    p.classList.add("show");
+  }, i*600);
+});
+
+// CORN PARTICLES
+const numberOfCorn = 20;
+for(let i=0;i<numberOfCorn;i++){
+  const c=document.createElement("div");
+  c.className="corn";
+  c.style.left = Math.random()*100 + "vw";
+  c.style.width = c.style.height = (3+Math.random()*5)+"px";
+  c.style.opacity = 0.3 + Math.random()*0.5;
+  c.style.animationDuration = (6 + Math.random()*5) + "s";
+  document.body.appendChild(c);
+}
+</script>
+
+</body>
+</html>

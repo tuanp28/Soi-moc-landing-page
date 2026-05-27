@@ -1,32 +1,55 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     products = [
-        {
-            'name': 'Phở Ngô Truyền Thống',
-            'price': '35.000đ',
-            'label': 'Bán chạy nhất',
-            'desc': 'Sợi phở ngô mộc mạc, dai ngon. Gói 500g đủ cho 2–3 người ăn.',
-            'img': 'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?q=80&w=700&auto=format&fit=crop'
-        },
-        {
-            'name': 'Phở Ngô Sợi Mộc Premium',
-            'price': '75.000đ',
-            'label': 'Premium',
-            'desc': 'Sợi thượng hạng, hộp quà sang trọng – lý tưởng để biếu tặng.',
-            'img': 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=700&auto=format&fit=crop'
-        },
-        {
-            'name': 'Combo Gia Đình',
-            'price': '165.000đ',
-            'label': 'Tiết kiệm nhất',
-            'desc': '3 gói truyền thống + 1 gói premium. Giảm 15% so với mua lẻ.',
-            'img': 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=700&auto=format&fit=crop'
-        },
-    ]
+    {
+        'name': 'Phở Ngũ Sắc',
+        'label': 'Tinh hoa ngũ sắc',
+        'desc': 'Phở ngũ sắc đặc sản Cao Bằng với màu sắc tự nhiên từ rau củ và ngũ cốc.',
+        'img': url_for('static', filename='image/pho1.jpg'),
+
+        'size1': '500g',
+        'people1': '2–3 người ăn',
+        'price1': '49.000đ',
+
+        'size2': '1kg',
+        'people2': 'Gia đình 4–5 người',
+        'price2': '95.000đ',
+    },
+
+    {
+        'name': 'Phở Ngô',
+        'label': 'Đặc sản truyền thống',
+        'desc': 'Sợi phở ngô dai mềm tự nhiên, vị mộc mạc đặc trưng vùng cao.',
+        'img': url_for('static', filename='image/pho-ngo.jpg'),
+
+        'size1': '500g',
+        'people1': '2–3 người ăn',
+        'price1': '39.000đ',
+
+        'size2': '1kg',
+        'people2': '4–5 người ăn',
+        'price2': '69.000đ',
+    },
+
+    {
+        'name': 'Phở Hoa Đậu Biếc',
+        'label': 'Thanh vị mỗi ngày',
+        'desc': 'Màu tím tự nhiên từ hoa đậu biếc, thanh nhẹ và dễ thưởng thức.',
+        'img': url_for('static', filename='image/pho-hoa.jpg'),
+
+        'size1': '500g',
+        'people1': '2–3 người ăn',
+        'price1': '42.000đ',
+
+        'size2': '1kg',
+        'people2': '4–5 người ăn',
+        'price2': '72.000đ',
+    },
+]
 
     reviews = [
         {'name': 'Hải Yến', 'loc': 'TP. Hồ Chí Minh', 'initials': 'HY',

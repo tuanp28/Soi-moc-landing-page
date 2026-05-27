@@ -82,18 +82,25 @@
   <div class="prod-grid">
     {% for p in products %}
     <div class="prod-card" onclick="openModal(
-      '{{ p.name }}',
-      '{{ p.img }}',
-      '{{ p.desc }}',
-      '{{ p.price }}'
-    )">
+  '{{ p.name }}',
+  '{{ p.img }}',
+  '{{ p.desc }}',
+
+  '{{ p.size1 }}',
+  '{{ p.people1 }}',
+  '{{ p.price1 }}',
+
+  '{{ p.size2 }}',
+  '{{ p.people2 }}',
+  '{{ p.price2 }}'
+)">
       <img src="{{ p.img }}" alt="{{ p.name }}"/>
       <div class="prod-body">
         <span class="prod-label">{{ p.label }}</span>
         <div class="prod-name">{{ p.name }}</div>
         <p class="prod-desc">{{ p.desc }}</p>
         <div class="prod-row">
-          <div class="prod-price">{{ p.price }}</div>
+          <div class="prod-price">{{ p.price1 }}</div>
           <a href="https://zalo.me/{{ contact.zalo }}" class="prod-cta" target="_blank">💬 Đặt qua Zalo</a>
         </div>
       </div>
@@ -256,22 +263,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
       <div class="modal-packages">
         <div class="package-item">
-          <h4>500g</h4>
-          <p>2–3 người ăn</p>
-          <span>35.000đ</span>
-        </div>
-
-        <div class="package-item">
-          <h4>1kg</h4>
-          <p>Gia đình 4–5 người</p>
-          <span>65.000đ</span>
-        </div>
-
-        <div class="package-item">
-          <h4>Combo Premium</h4>
-          <p>Hộp quà cao cấp</p>
-          <span>165.000đ</span>
-        </div>
+          <h4 id="size1"></h4>
+          <p id="people1"></p>
+          <span id="price1"></span>
+      </div>
+          <div class="package-item">
+          <h4 id="size2"></h4>
+          <p id="people2"></p>
+          <span id="price2"></span>
+      </div>
       </div>
 
       <a href="https://zalo.me/{{ contact.zalo }}"
@@ -284,7 +284,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   </div>
 </div>
 <script>
-function openModal(name, img, desc, price) {
+function openModal(
+  name,
+  img,
+  desc,
+
+  size1,
+  people1,
+  price1,
+
+  size2,
+  people2,
+  price2
+) {
 
   document.getElementById("productModal").style.display = "flex";
 
@@ -294,6 +306,15 @@ function openModal(name, img, desc, price) {
 
   document.getElementById("modalDesc").innerText = desc;
 
+  // GÓI 1
+  document.getElementById("size1").innerText = size1;
+  document.getElementById("people1").innerText = people1;
+  document.getElementById("price1").innerText = price1;
+
+  // GÓI 2
+  document.getElementById("size2").innerText = size2;
+  document.getElementById("people2").innerText = people2;
+  document.getElementById("price2").innerText = price2;
 }
 
 function closeModal() {

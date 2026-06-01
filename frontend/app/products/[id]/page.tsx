@@ -2,7 +2,7 @@
 
 import React, { useState, use } from 'react';
 import { products } from '../../data/products';
-import { ArrowLeft, Clock, MessageSquare, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,8 @@ export default function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState(product.sizes[0].weight);
   const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
   const [copied, setCopied] = useState(false);
@@ -27,7 +29,7 @@ export default function ProductDetailPage({ params }: PageProps) {
   const sizeInfo = product.sizes.find((s) => s.weight === selectedWeight) || product.sizes[0];
 
   const handleConsultation = () => {
-    const text = `Xin chào Sợi Mộc, tôi đang xem trang web và muốn nhận tư vấn đặt mua sản phẩm: ${product.name} (Hộp ${selectedWeight}) - Giá: ${sizeInfo.priceStr}`;
+    const text = `Xin chào Sợi Mộc, tôi đang xem trang web và muốn nhận tư vấn đặt mua sản phẩm: ${product.name} (Túi ${selectedWeight}) - Giá: ${sizeInfo.priceStr}`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => {
@@ -55,21 +57,89 @@ export default function ProductDetailPage({ params }: PageProps) {
           
           {/* Left Column: Image Showcase */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="aspect-[4/3] w-full bg-white border border-brand-green/10 overflow-hidden relative group">
+            <div className="aspect-square w-full bg-white border border-brand-green/10 overflow-hidden relative group flex items-center justify-center">
               {product.badge && (
-                <div className="absolute top-4 left-4 bg-brand-green text-white px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono z-15 shadow-sm">
+                <div className="absolute top-4 left-4 bg-brand-green text-white px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono z-25 shadow-sm">
                   {product.badge}
                 </div>
               )}
-              <motion.img
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+              
+              <div className="w-full h-full relative flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={activeImageIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    src={productImages[activeImageIndex]}
+                    alt={`${product.name} - Ảnh ${activeImageIndex + 1}`}
+                    className="w-full h-full object-contain p-6 select-none"
+                  />
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Arrows */}
+              {productImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setActiveImageIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1))}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-brand-charcoal p-2.5 border border-brand-green/10 hover:border-brand-green/30 transition-all z-20 cursor-pointer shadow-sm hover:scale-105 active:scale-95 focus:outline-none"
+                    aria-label="Ảnh trước"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-brand-charcoal" />
+                  </button>
+                  <button
+                    onClick={() => setActiveImageIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1))}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-brand-charcoal p-2.5 border border-brand-green/10 hover:border-brand-green/30 transition-all z-20 cursor-pointer shadow-sm hover:scale-105 active:scale-95 focus:outline-none"
+                    aria-label="Ảnh tiếp theo"
+                  >
+                    <ChevronRight className="w-5 h-5 text-brand-charcoal" />
+                  </button>
+                </>
+              )}
+
+              {/* Slider Dots */}
+              {productImages.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
+                  {productImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        activeImageIndex === idx
+                          ? 'bg-brand-green w-5'
+                          : 'bg-brand-charcoal/20 hover:bg-brand-charcoal/40'
+                      }`}
+                      aria-label={`Chuyển đến ảnh ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Thumbnails */}
+            {productImages.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto py-1 scrollbar-none">
+                {productImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`w-20 h-20 bg-white border-2 overflow-hidden flex-shrink-0 transition-all p-2 cursor-pointer ${
+                      activeImageIndex === idx
+                        ? 'border-brand-green shadow-xs scale-[1.02]'
+                        : 'border-brand-green/10 hover:border-brand-green/30 hover:scale-[1.01]'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} thumbnail ${idx + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
             
             {/* Technical highlight points */}
             <div className="grid grid-cols-2 gap-4">
@@ -126,7 +196,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                           : 'border-brand-green/10 bg-white text-brand-muted hover:border-brand-green/30 hover:text-brand-charcoal'
                       }`}
                     >
-                      <span>HỘP {sz.weight.toUpperCase()}</span>
+                      <span>TÚI {sz.weight.toUpperCase()}</span>
                       <span className={selectedWeight === sz.weight ? 'text-brand-green font-black' : 'text-brand-muted'}>
                         {sz.priceStr}
                       </span>

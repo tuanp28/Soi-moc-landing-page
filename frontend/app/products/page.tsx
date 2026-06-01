@@ -73,6 +73,28 @@ export default function ProductsPage() {
                 <ProductCard product={product} />
               </motion.div>
             ))}
+
+            {/* Teaser card for updates */}
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="h-full"
+            >
+              <div className="h-full w-full flex flex-col justify-center items-center p-8 bg-white border border-dashed border-brand-green/20 text-center space-y-4 min-h-[320px]">
+                <div className="w-12 h-12 rounded-full bg-brand-green/5 flex items-center justify-center text-brand-green">
+                  <span className="text-xl animate-pulse">✨</span>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black tracking-widest text-brand-green font-mono uppercase">COMING SOON</p>
+                  <h3 className="text-base font-bold text-brand-charcoal uppercase font-serif">Đang Cập Nhật Sản Phẩm</h3>
+                </div>
+                <p className="text-[11px] text-brand-muted max-w-[200px] leading-relaxed font-medium">
+                  Chúng tôi đang nghiên cứu thêm các dòng bún/phở ngô và đặc sản sạch Cao Bằng mới.
+                </p>
+              </div>
+            </motion.div>
           </AnimatePresence>
         </motion.div>
 

@@ -74,7 +74,7 @@ export const Footer: React.FC = () => {
               <MapPin className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Vùng nguyên liệu & sản xuất:</p>
-                <p>Quảng Uyên, Quảng Hòa, Cao Bằng</p>
+                <p>Cao Bằng, Việt Nam</p>
               </div>
             </li>
             <li className="flex items-start gap-2 text-stone-300 text-xs">

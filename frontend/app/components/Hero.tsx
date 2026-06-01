@@ -78,16 +78,18 @@ export const Hero: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.3] uppercase font-serif"
+            className="font-black tracking-tight leading-[1.25] uppercase font-serif"
           >
-            <span className="block mb-2 text-brand-green">NĂNG LƯỢNG MỘC</span>
-            <span className="text-brand-gold block relative w-fit pb-2 select-none">
-              BỨT PHÁ BỀN BỈ
+            <span className="block text-3xl sm:text-4xl md:text-6xl xl:text-7xl text-brand-green mb-3 md:mb-5">
+              NĂNG LƯỢNG MỘC
+            </span>
+            <span className="block text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-brand-gold relative w-fit pb-2 select-none whitespace-nowrap mt-1 md:mt-2">
+              DINH DƯỠNG SẠCH TỪ THIÊN NHIÊN
               <motion.span
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-                className="absolute bottom-0 left-0 w-full h-[4px] bg-brand-gold origin-left rounded-full shadow-[0_0_12px_rgba(200,149,58,0.6)]"
+                className="absolute bottom-0 left-0 w-full h-[3px] bg-brand-gold origin-left rounded-full shadow-[0_0_12px_rgba(200,149,58,0.6)]"
               />
             </span>
           </motion.h1>
@@ -99,7 +101,7 @@ export const Hero: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-brand-muted text-sm md:text-base max-w-xl leading-relaxed font-medium"
           >
-            Được sấy lạnh khép kín trong 36 giờ từ hạt ngô tẻ đặc sản Cao Bằng. Sợi phở ngô Sợi Mộc cung cấp nguồn Carb phức hợp hấp thu chậm, bổ sung chất xơ tự nhiên dồi dào, đánh thức sức mạnh cơ bắp và duy trì năng lượng bền bỉ cho ngày dài vận động.
+            Được chế biến từ hạt ngô tẻ đặc sản Cao Bằng qua công nghệ sấy lạnh khép kín 36 giờ, sợi phở ngô Sợi Mộc mang lại nguồn dinh dưỡng sạch từ thiên nhiên nhờ nguồn Carb phức hợp hấp thu chậm và chất xơ dồi dào, tiếp thêm năng lượng sạch lành cho ngày dài năng động.
           </motion.p>
 
           {/* Technical Specs Summary */}

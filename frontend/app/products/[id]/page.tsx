@@ -57,7 +57,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           
           {/* Left Column: Image Showcase */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="aspect-square w-full bg-white border border-brand-green/10 overflow-hidden relative group flex items-center justify-center">
+            <div className="aspect-[3/4] w-full bg-white border border-brand-green/10 overflow-hidden relative group flex items-center justify-center">
               {product.badge && (
                 <div className="absolute top-4 left-4 bg-brand-green text-white px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono z-25 shadow-sm">
                   {product.badge}
@@ -74,7 +74,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                     transition={{ duration: 0.3 }}
                     src={productImages[activeImageIndex]}
                     alt={`${product.name} - Ảnh ${activeImageIndex + 1}`}
-                    className="w-full h-full object-contain p-6 select-none"
+                    className="w-full h-full object-cover select-none"
                   />
                 </AnimatePresence>
               </div>

@@ -32,8 +32,8 @@ export const products: Product[] = [
     tagline: 'SỨC MẠNH TỪ NGÔ BẢN ĐỊA CAO BẰNG',
     description: 'Sợi phở vàng óng tự nhiên từ ngô tẻ vùng cao, sấy lạnh 36h giữ trọn vẹn chất xơ và vitamin. Carb hấp thu chậm hỗ trợ tối ưu cho lối sống năng động và tập luyện.',
     details: 'Được chế biến từ hạt ngô tẻ thuần chủng trồng trên các hốc đá Cao Bằng. Áp dụng công nghệ nghiền cối đá thủy lực tốc độ chậm giúp bảo toàn lớp cám ngô giàu dinh dưỡng. Trải qua quy trình sấy lạnh khép kín 36 giờ, sợi phở ngô giữ được độ dai dẻo mộc mạc và hương thơm ngậy đặc trưng mà không cần bất cứ chất phụ gia nào.',
-    image: '/images/pho1.jpg',
-    images: ['/images/pho1.jpg'],
+    image: '/images/pho-ngo-premium.jpg',
+    images: ['/images/pho-ngo-premium.jpg', '/images/pho1.jpg'],
     features: ['100% Ngô bản địa Cao Bằng', 'Không chứa Gluten (Gluten-Free)', 'Carbohydrate phức hợp hấp thu chậm', 'Chỉ số đường huyết (GI) thấp'],
     cookingTime: '6 - 8 phút',
     nutrition: {
@@ -103,8 +103,8 @@ export const products: Product[] = [
     tagline: 'SẮC TÍM THẢO MỘC, THƠM NGON TRUYỀN THỐNG',
     description: 'Bún cẩm Cao Tuyền có màu tím tự nhiên từ lá cẩm, sợi bún mềm, dai, thơm ngon và được chế biến thủ công từ gạo ngon địa phương.',
     details: 'Được chế biến thủ công truyền thống từ gạo ngon Cao Bằng và nước lá cẩm tươi tự nhiên, không chất phụ gia hay phẩm màu hóa học. Sản phẩm bún khô Cao Tuyền đã được vinh danh là sản phẩm công nghiệp nông thôn tiêu biểu của tỉnh Cao Bằng, mang hương vị mộc mạc đặc trưng, béo bùi của gạo vùng cao và sợi bún dai ngon dẻo dai.',
-    image: '/images/bun-cam.png',
-    images: ['/images/bun-cam.png'],
+    image: '/images/bun-cam-2.jpg',
+    images: ['/images/bun-cam-2.jpg', '/images/bun-cam-1.jpg', '/images/bun-cam.png'],
     features: ['100% Màu tự nhiên từ lá cẩm', 'Gạo Đoàn Kết Cao Bằng', 'Không chất bảo quản & phụ gia', 'Sản phẩm OCOP tiêu biểu'],
     cookingTime: '5 - 7 phút',
     nutrition: {
@@ -115,7 +115,7 @@ export const products: Product[] = [
       fat: '0.9g'
     },
     sizes: [
-      { weight: '500g', price: 40000, priceStr: '40.000đ', target: 'Phù hợp 2-3 người ăn' }
+      { weight: '500g', price: 35000, priceStr: '35.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'specialty'
   },

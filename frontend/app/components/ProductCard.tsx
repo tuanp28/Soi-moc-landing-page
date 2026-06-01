@@ -35,11 +35,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       )}
 
       {/* Image Area */}
-      <Link href={`/products/${product.id}`} className="block relative aspect-square overflow-hidden bg-white cursor-pointer border-b border-brand-green/5">
+      <Link href={`/products/${product.id}`} className="block relative aspect-[3/4] overflow-hidden bg-white cursor-pointer border-b border-brand-green/5">
         <motion.img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         
         {/* Quick Tech Overlay */}

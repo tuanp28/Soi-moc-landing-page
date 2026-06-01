@@ -4,7 +4,7 @@ import './globals.css';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { FloatingContact } from './components/FloatingContact';
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from '@vercel/analytics/next';
 
 const playfair = Playfair_Display({
   subsets: ['latin', 'vietnamese'],

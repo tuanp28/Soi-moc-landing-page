@@ -201,7 +201,7 @@ export const Hero: React.FC = () => {
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 100, delay: 0.2 }}
               whileHover={{ scale: 1.05, rotate: 2, boxShadow: "0 30px 60px rgba(45, 90, 39, 0.2)" }}
-              className="w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing transition-shadow duration-300"
+              className="w-full h-full relative cursor-grab active:cursor-grabbing transition-shadow duration-300"
             >
               <Image
                 src="/images/pho1.jpg"

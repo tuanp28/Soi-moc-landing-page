@@ -3,6 +3,7 @@
 import React from 'react';
 import { Product } from '../data/products';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
@@ -36,14 +37,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Image Area */}
       <Link href={`/products/${product.id}`} className="block relative aspect-[3/4] overflow-hidden bg-white cursor-pointer border-b border-brand-green/5">
-        <motion.img
+        <Image
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+          loading="lazy"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         
         {/* Quick Tech Overlay */}
-        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 border border-brand-green/10 font-mono text-[8px] text-brand-muted tracking-wider uppercase font-semibold">
+        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 border border-brand-green/10 font-mono text-[8px] text-brand-muted tracking-wider uppercase font-semibold z-10">
           ⚡ {product.cookingTime}
         </div>
       </Link>
@@ -78,10 +82,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <Link
             href={`/products/${product.id}`}
-            className="px-4 py-2.5 bg-brand-charcoal hover:bg-brand-green text-white hover:text-white transition-all duration-300 text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 bg-brand-charcoal hover:bg-brand-green text-white hover:text-white transition-all duration-300 text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5 cursor-pointer hover:shadow-xs active:scale-95"
           >
             CHI TIẾT
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300" />
           </Link>
         </div>
       </div>

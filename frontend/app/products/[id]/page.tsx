@@ -4,6 +4,7 @@ import React, { useState, use } from 'react';
 import { products } from '../../data/products';
 import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -66,16 +67,23 @@ export default function ProductDetailPage({ params }: PageProps) {
               
               <div className="w-full h-full relative flex items-center justify-center">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <motion.div
                     key={activeImageIndex}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    src={productImages[activeImageIndex]}
-                    alt={`${product.name} - Ảnh ${activeImageIndex + 1}`}
-                    className="w-full h-full object-cover select-none"
-                  />
+                    className="w-full h-full relative"
+                  >
+                    <Image
+                      src={productImages[activeImageIndex]}
+                      alt={`${product.name} - Ảnh ${activeImageIndex + 1}`}
+                      fill
+                      priority={activeImageIndex === 0}
+                      sizes="(max-width: 768px) 100vw, 600px"
+                      className="object-cover select-none"
+                    />
+                  </motion.div>
                 </AnimatePresence>
               </div>
 
@@ -125,16 +133,18 @@ export default function ProductDetailPage({ params }: PageProps) {
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`w-20 h-20 bg-white border-2 overflow-hidden flex-shrink-0 transition-all p-2 cursor-pointer ${
+                    className={`w-20 h-20 bg-white border-2 overflow-hidden flex-shrink-0 transition-all p-2 cursor-pointer relative ${
                       activeImageIndex === idx
                         ? 'border-brand-green shadow-xs scale-[1.02]'
                         : 'border-brand-green/10 hover:border-brand-green/30 hover:scale-[1.01]'
                     }`}
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`${product.name} thumbnail ${idx + 1}`}
-                      className="w-full h-full object-contain"
+                      fill
+                      sizes="80px"
+                      className="object-contain p-2"
                     />
                   </button>
                 ))}
@@ -223,12 +233,13 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Consultation Button */}
-              <div className="relative">
+              <div className="relative group">
                 <button
                   onClick={handleConsultation}
-                  className="w-full py-5 bg-brand-green hover:bg-brand-green-hover text-white font-extrabold text-xs tracking-widest transition-colors flex items-center justify-center gap-2 uppercase rounded-none cursor-pointer"
+                  className="w-full py-5 bg-gradient-to-r from-brand-green via-brand-green-hover to-brand-green text-white font-black text-xs tracking-widest hover:shadow-[0_0_25px_rgba(45,90,39,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer relative overflow-hidden select-none"
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <span className="absolute inset-0 w-full h-full bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  <MessageSquare className="w-4 h-4 fill-white/10 text-white animate-pulse" />
                   {copied ? 'ĐÃ COPY LỜI NHẮN! ĐANG MỞ ZALO...' : 'NHẬN TƯ VẤN & ĐẶT MUA QUA ZALO'}
                 </button>
 
@@ -238,12 +249,40 @@ export default function ProductDetailPage({ params }: PageProps) {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold"
+                      className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold z-10"
                     >
                       ✓ Lời nhắn đã được lưu. Hãy dán (Paste) vào ô chat Zalo sắp mở ra!
                     </motion.p>
                   )}
                 </AnimatePresence>
+              </div>
+
+              {/* Trust signals indicators block */}
+              <div className="mt-8 p-5 bg-white border border-brand-green/10 space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-brand-green/5">
+                  <ShieldCheck className="w-5 h-5 text-brand-green shrink-0 animate-pulse" />
+                  <span className="text-xs font-black tracking-widest text-brand-charcoal font-mono uppercase">
+                    CAM KẾT CHẤT LƯỢNG & ĐỘ TIN CẬY
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-[10px] leading-relaxed tracking-wide text-brand-muted uppercase font-semibold">
+                  <div className="flex items-start gap-2">
+                    <span className="text-brand-green shrink-0 text-xs font-black">✓</span>
+                    <p><strong className="text-brand-charcoal">CAM KẾT 3 KHÔNG:</strong> KHÔNG HÀN THE // KHÔNG CHẤT TẨY // KHÔNG PHẨM MÀU.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-brand-green shrink-0 text-xs font-black">✓</span>
+                    <p><strong className="text-brand-charcoal">SHIP COD TOÀN QUỐC:</strong> KIỂM HÀNG TRƯỚC KHI THANH TOÁN TIỀN.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-brand-green shrink-0 text-xs font-black">✓</span>
+                    <p><strong className="text-brand-charcoal">BẢO HÀNH ĐỔI TRẢ:</strong> 1 ĐỔI 1 MIỄN PHÍ TRONG 7 NGÀY NẾU BỊ ẨM MỐC.</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-brand-green shrink-0 text-xs font-black">✓</span>
+                    <p><strong className="text-brand-charcoal">CHỨNG NHẬN OCOP:</strong> ĐẠT CHUẨN OCOP VÀ VỆ SINH AN TOÀN THỰC PHẨM.</p>
+                  </div>
+                </div>
               </div>
 
             </div>

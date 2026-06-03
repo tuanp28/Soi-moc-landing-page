@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Hero } from './components/Hero';
+import { ValueShowcase } from './components/ValueShowcase';
 import { Manifesto } from './components/Manifesto';
 import { TechShowcase } from './components/TechShowcase';
 import { ReviewSection } from './components/ReviewSection';
@@ -35,6 +36,9 @@ export default function Home() {
           100% { transform: translateX(-50%); }
         }
       `}</style>
+
+      {/* 2.5. Value Proposition Grid Showcase */}
+      <ValueShowcase />
 
       {/* 3. Product Showcase Section */}
       <section className="py-24 max-w-7xl mx-auto px-5 md:px-10">

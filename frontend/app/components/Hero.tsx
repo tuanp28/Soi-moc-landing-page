@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Flame, Shield, Activity } from 'lucide-react';
 
 const LeafSVG: React.FC<{ className?: string }> = ({ className }) => (
@@ -60,18 +61,42 @@ export const Hero: React.FC = () => {
         {/* Text Content */}
         <div className="lg:col-span-8 flex flex-col justify-center space-y-6 text-left">
           
-          {/* Tagline */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 bg-brand-green-pale border border-brand-green/20 px-3 py-1.5 w-fit"
-          >
-            <Flame className="w-4 h-4 text-brand-green animate-pulse" />
-            <span className="text-[10px] font-black tracking-widest text-brand-green uppercase font-mono">
-              SIÊU THỰC PHẨM THẾ HỆ MỚI
-            </span>
-          </motion.div>
+          {/* Tagline & Trust Badges */}
+          <div className="flex flex-wrap gap-2.5 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-brand-green-pale border border-brand-green/20 px-3 py-1.5 w-fit select-none"
+            >
+              <Flame className="w-4 h-4 text-brand-green animate-pulse" />
+              <span className="text-[10px] font-black tracking-widest text-brand-green uppercase font-mono">
+                SIÊU THỰC PHẨM THẾ HỆ MỚI
+              </span>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-1.5 bg-brand-gold/10 border border-brand-gold/30 px-3 py-1.5 w-fit select-none"
+            >
+              <span className="text-[10px] font-black tracking-widest text-brand-gold uppercase font-mono">
+                ★ ĐẠT CHUẨN OCOP CAO BẰNG
+              </span>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 w-fit select-none"
+            >
+              <span className="text-[10px] font-black tracking-widest text-emerald-800 uppercase font-mono">
+                ✓ ĐẠT CHUẨN VSATTP
+              </span>
+            </motion.div>
+          </div>
 
           {/* Heading */}
           <motion.h1
@@ -143,14 +168,14 @@ export const Hero: React.FC = () => {
           >
             <Link
               href="/products"
-              className="px-8 py-4 bg-brand-green hover:bg-brand-green-hover text-white font-extrabold text-xs tracking-widest transition-colors flex items-center gap-2 uppercase group rounded-none"
+              className="px-8 py-4 bg-gradient-to-r from-brand-green to-brand-green-hover text-white font-extrabold text-xs tracking-widest hover:shadow-[0_0_20px_rgba(45,90,39,0.4)] active:scale-95 transition-all duration-300 flex items-center gap-2.5 uppercase group rounded-none border border-brand-green/20"
             >
               XEM SẢN PHẨM PREMIUM
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
             </Link>
             <Link
               href="/about"
-              className="px-8 py-4 border border-brand-green/20 hover:border-brand-green text-brand-green hover:text-white font-extrabold text-xs tracking-widest transition-all duration-300 uppercase rounded-none"
+              className="px-8 py-4 border border-brand-green/20 hover:border-brand-green text-brand-green hover:text-white font-extrabold text-xs tracking-widest hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] active:scale-95 transition-all duration-300 uppercase rounded-none"
             >
               TÌM HIỂU CÂU CHUYỆN
             </Link>
@@ -176,12 +201,14 @@ export const Hero: React.FC = () => {
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 100, delay: 0.2 }}
               whileHover={{ scale: 1.05, rotate: 2, boxShadow: "0 30px 60px rgba(45, 90, 39, 0.2)" }}
-              className="w-full h-full cursor-grab active:cursor-grabbing transition-shadow duration-300"
+              className="w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing transition-shadow duration-300"
             >
-              <img
+              <Image
                 src="/images/pho1.jpg"
                 alt="Phở Ngô Khô Sợi Mộc"
-                className="w-full h-full object-cover shadow-xl rounded-none border border-brand-green/10"
+                fill
+                priority
+                className="object-cover shadow-xl rounded-none border border-brand-green/10"
               />
               {/* Corner Badges */}
               <div className="absolute -top-3 -right-3 bg-brand-gold text-white px-3 py-1 text-[9px] font-black tracking-widest uppercase font-mono shadow-sm">

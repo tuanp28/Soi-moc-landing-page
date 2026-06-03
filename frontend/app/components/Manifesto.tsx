@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Quote } from 'lucide-react';
 
 export const Manifesto: React.FC = () => {
@@ -17,12 +18,15 @@ export const Manifesto: React.FC = () => {
           {/* Left Block: Image Collage */}
           <div className="lg:col-span-5 relative">
             <div className="relative aspect-[3/4] w-full max-w-sm mx-auto overflow-hidden bg-brand-cream/50 border border-brand-green/10">
-              <img
+              <Image
                 src="/images/anh2.jpg"
                 alt="Quy trình chế biến bún phở ngô khô"
-                className="w-full h-full object-cover grayscale opacity-90 contrast-110 hover:grayscale-0 hover:opacity-100 transition-all duration-700"
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                loading="lazy"
+                className="object-cover grayscale opacity-90 contrast-110 hover:grayscale-0 hover:opacity-100 transition-all duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/10 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/10 via-transparent to-transparent z-10" />
             </div>
 
             {/* Float badge */}

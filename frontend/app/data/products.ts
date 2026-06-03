@@ -32,8 +32,8 @@ export const products: Product[] = [
     tagline: 'SỨC MẠNH TỪ NGÔ BẢN ĐỊA CAO BẰNG',
     description: 'Sợi phở vàng óng tự nhiên từ ngô tẻ vùng cao, sấy lạnh 36h giữ trọn vẹn chất xơ và vitamin. Carb hấp thu chậm hỗ trợ tối ưu cho lối sống năng động và tập luyện.',
     details: 'Được chế biến từ hạt ngô tẻ thuần chủng trồng trên các hốc đá Cao Bằng. Áp dụng công nghệ nghiền cối đá thủy lực tốc độ chậm giúp bảo toàn lớp cám ngô giàu dinh dưỡng. Trải qua quy trình sấy lạnh khép kín 36 giờ, sợi phở ngô giữ được độ dai dẻo mộc mạc và hương thơm ngậy đặc trưng mà không cần bất cứ chất phụ gia nào.',
-    image: '/images/pho-ngo-premium.jpg',
-    images: ['/images/pho-ngo-premium.jpg', '/images/pho1.jpg'],
+    image: '/images/pho-ngo-main.jpg',
+    images: ['/images/pho-ngo-main.jpg', '/images/pho-ngo-premium.jpg'],
     features: ['100% Ngô bản địa Cao Bằng', 'Không chứa Gluten (Gluten-Free)', 'Carbohydrate phức hợp hấp thu chậm', 'Chỉ số đường huyết (GI) thấp'],
     cookingTime: '6 - 8 phút',
     nutrition: {
@@ -56,8 +56,8 @@ export const products: Product[] = [
     tagline: 'TIÊU CHUẨN MỚI CỦA SỢI BÚN SẠCH',
     description: 'Sợi bún tròn dai dẻo, mang màu sắc vàng nắng của ngô Cao Bằng. Sự lựa chọn hoàn hảo thay thế bún gạo thường cho chế độ ăn kiêng và kiểm soát cân nặng.',
     details: 'Sản phẩm bún ngô khô được định hình sợi tròn truyền thống nhưng mang đột phá về mặt dinh dưỡng. Sợi bún dai mướt, khi nấu không bị nát, có hậu vị ngọt thanh nhẹ của tinh bột ngô chín. Chứa hàm lượng chất xơ cao gấp 3 lần bún gạo thông thường giúp bạn no lâu hơn, cung cấp năng lượng bền bỉ cho cả ngày dài.',
-    image: '/images/bun-ngo.jpg',
-    images: ['/images/bun-ngo.jpg', '/images/final.png'],
+    image: '/images/bun-ngo-main.jpg',
+    images: ['/images/bun-ngo-main.jpg', '/images/bun-ngo-1.jpg', '/images/bun-ngo-2.jpg', '/images/bun-ngo.jpg'],
     features: ['Không phẩm màu hóa học', 'Hàm lượng chất xơ cao vượt trội', 'Nguồn năng lượng sạch bền bỉ', 'Hỗ trợ ăn kiêng & Eat Clean'],
     cookingTime: '5 - 7 phút',
     nutrition: {
@@ -81,7 +81,7 @@ export const products: Product[] = [
     description: 'Sự giao thoa đầy màu sắc giữa gạo đặc sản vùng cao và các loại rau củ hữu cơ tự nhiên (Lá cẩm, hoa đậu biếc, gấc, chùm ngây, ngô).',
     details: 'Phở Ngũ Sắc mang lại bàn ăn rực rỡ và giàu vi chất dinh dưỡng. 5 màu sắc đại diện cho 5 hương vị và dưỡng chất thực vật khác nhau: Màu vàng từ ngô tẻ, màu đỏ từ gấc, màu tím từ lá cẩm, màu xanh từ chùm ngây và màu xanh lam từ hoa đậu biếc. Sợi phở dai ngon đặc trưng vùng Cao Bằng, hoàn toàn tự nhiên, không hàn trang, không chất tẩy.',
     image: '/images/pho-ngu-sac.jpg',
-    images: ['/images/pho-ngu-sac.jpg', '/images/Hero.png'],
+    images: ['/images/pho-ngu-sac.jpg', '/images/pho1.jpg'],
     features: ['Chiết xuất rau củ quả tự nhiên', 'Giàu chất chống oxy hóa phytochemistry', 'Dai dẻo truyền thống Cao Bằng', 'Đẹp mắt, khơi dậy vị giác'],
     cookingTime: '6 - 8 phút',
     nutrition: {
@@ -104,7 +104,7 @@ export const products: Product[] = [
     description: 'Bún cẩm Cao Tuyền có màu tím tự nhiên từ lá cẩm, sợi bún mềm, dai, thơm ngon và được chế biến thủ công từ gạo ngon địa phương.',
     details: 'Được chế biến thủ công truyền thống từ gạo ngon Cao Bằng và nước lá cẩm tươi tự nhiên, không chất phụ gia hay phẩm màu hóa học. Sản phẩm bún khô Cao Tuyền đã được vinh danh là sản phẩm công nghiệp nông thôn tiêu biểu của tỉnh Cao Bằng, mang hương vị mộc mạc đặc trưng, béo bùi của gạo vùng cao và sợi bún dai ngon dẻo dai.',
     image: '/images/bun-cam-2.jpg',
-    images: ['/images/bun-cam-2.jpg', '/images/bun-cam-1.jpg', '/images/bun-cam.png'],
+    images: ['/images/bun-cam-2.jpg', '/images/bun-cam.png'],
     features: ['100% Màu tự nhiên từ lá cẩm', 'Gạo Đoàn Kết Cao Bằng', 'Không chất bảo quản & phụ gia', 'Sản phẩm OCOP tiêu biểu'],
     cookingTime: '5 - 7 phút',
     nutrition: {
@@ -115,7 +115,7 @@ export const products: Product[] = [
       fat: '0.9g'
     },
     sizes: [
-      { weight: '500g', price: 35000, priceStr: '35.000đ', target: 'Phù hợp 2-3 người ăn' }
+      { weight: '500g', price: 38000, priceStr: '38.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'specialty'
   },

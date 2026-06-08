@@ -21,15 +21,17 @@ interface Order {
 }
 
 export default function ProfilePage() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Parse user metadata & date details
-  const fullName = user?.user_metadata?.full_name || 'Khách hàng Sợi Mộc';
-  const email = user?.email || 'N/A';
-  const userId = user?.id || 'N/A';
+  const fullName = profile?.fullName || user?.user_metadata?.full_name || 'Khách hàng Sợi Mộc';
+  const email = profile?.email || user?.email || 'N/A';
+  const userId = profile?.id || user?.id || 'N/A';
+  const role = profile?.role || 'customer';
+  const vipLevel = profile?.vipLevel || 'normal';
   const joinDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('vi-VN', {
         year: 'numeric',
@@ -40,6 +42,50 @@ export default function ProfilePage() {
 
   // Card Number simulation based on UUID hash
   const cardNumber = `SM-${userId.substring(0, 4)}-${userId.substring(9, 13)}-${userId.substring(19, 23)}`.toUpperCase();
+
+  // Dynamic card colors & labels based on VIP Level
+  const getVipCardStyles = (level: string) => {
+    switch (level) {
+      case 'diamond':
+        return {
+          gradient: 'from-[#0f172a] via-[#1e293b] to-[#0f172a] border-cyan-500/30',
+          badgeBg: 'bg-cyan-500/20 border-cyan-400/40 text-cyan-200',
+          badgeText: 'Kim Cương',
+          highlightText: 'Giảm 15% tất cả đơn hàng',
+          goldHighlight: 'text-cyan-400',
+          glowColor: 'rgba(6,182,212,0.15)'
+        };
+      case 'gold':
+        return {
+          gradient: 'from-[#2d1e08] via-[#523d1c] to-[#2d1e08] border-[#C8953A]/30',
+          badgeBg: 'bg-[#C8953A]/25 border-[#C8953A]/40 text-[#FAF6EE]',
+          badgeText: 'Vàng',
+          highlightText: 'Giảm 10% tất cả đơn hàng',
+          goldHighlight: 'text-[#C8953A]',
+          glowColor: 'rgba(200,149,58,0.25)'
+        };
+      case 'silver':
+        return {
+          gradient: 'from-[#27272a] via-[#3f3f46] to-[#27272a] border-stone-400/30',
+          badgeBg: 'bg-stone-500/20 border-stone-400/40 text-stone-200',
+          badgeText: 'Bạc',
+          highlightText: 'Giảm 5% tất cả đơn hàng',
+          goldHighlight: 'text-stone-300',
+          glowColor: 'rgba(214,211,209,0.15)'
+        };
+      default:
+        return {
+          gradient: 'from-[#1a3817] via-[#2D5A27] to-[#142812] border-brand-green/20',
+          badgeBg: 'bg-emerald-500/20 border-emerald-400/30 text-emerald-250',
+          badgeText: 'Tiêu Chuẩn',
+          highlightText: 'Tích điểm thành viên',
+          goldHighlight: 'text-emerald-400',
+          glowColor: 'rgba(52,211,153,0.15)'
+        };
+    }
+  };
+
+  const cardStyle = getVipCardStyles(vipLevel);
 
   // Fetch past orders from Supabase
   useEffect(() => {
@@ -131,24 +177,25 @@ export default function ProfilePage() {
                 initial={{ rotateY: -10, opacity: 0 }}
                 animate={{ rotateY: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="w-full aspect-[1.586/1] bg-gradient-to-br from-[#1a3817] via-[#2D5A27] to-[#142812] text-white p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col justify-between border border-white/10"
+                className={`w-full aspect-[1.586/1] bg-gradient-to-br ${cardStyle.gradient} text-white p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col justify-between border`}
+                style={{ boxShadow: `0 25px 50px -12px ${cardStyle.glowColor}` }}
               >
                 {/* Gloss sheen effect */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,149,58,0.25),transparent_60%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_60%)] pointer-events-none" />
                 <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
                 <div className="flex justify-between items-start z-10">
                   <div className="space-y-1">
-                    <p className="text-[9px] font-black tracking-widest text-[#C8953A] uppercase font-mono">
+                    <p className={`text-[9px] font-black tracking-widest ${cardStyle.goldHighlight} uppercase font-mono`}>
                       SỢI MỘC CLUB MEMBER
                     </p>
                     <h2 className="text-xl font-bold font-serif tracking-tight">Sợi Mộc</h2>
                   </div>
                   
                   {/* VIP Badge */}
-                  <div className="flex items-center gap-1.5 bg-[#C8953A]/25 border border-[#C8953A]/40 px-2.5 py-1 text-[8px] font-black tracking-wider text-[#FAF6EE] uppercase font-mono">
-                    <Award className="w-3.5 h-3.5 text-[#C8953A]" />
-                    Bạch Kim
+                  <div className={`flex items-center gap-1.5 ${cardStyle.badgeBg} border px-2.5 py-1 text-[8px] font-black tracking-wider uppercase font-mono`}>
+                    <Award className={`w-3.5 h-3.5 ${cardStyle.goldHighlight}`} />
+                    {cardStyle.badgeText}
                   </div>
                 </div>
 
@@ -166,7 +213,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="text-right">
                     <p className="text-[8px] text-white/50 uppercase tracking-widest font-mono">Ưu đãi hiện tại</p>
-                    <p className="text-xs font-black text-[#C8953A] mt-0.5">Giảm 5% đơn hàng</p>
+                    <p className={`text-xs font-black ${cardStyle.goldHighlight} mt-0.5`}>{cardStyle.highlightText}</p>
                   </div>
                 </div>
               </motion.div>

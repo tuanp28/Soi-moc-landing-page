@@ -10,12 +10,38 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  customer
+  vip
+  staff
+  manager
+  admin
+}
+
+enum VipLevel {
+  normal
+  silver
+  gold
+  diamond
+}
+
+model Profile {
+  id        String   @id
+  email     String   @unique
+  fullName  String
+  avatarUrl String?
+  role      Role     @default(customer)
+  vipLevel  VipLevel @default(normal)
+  createdAt DateTime @default(now())
+}
+
 model Contact {
   id        String   @id @default(cuid())
   name      String
-  email     String
-  phone     String?
+  email     String   @unique
+  phone     String   @unique
   subject   String?
   message   String
+  userId    String?
   createdAt DateTime @default(now())
 }

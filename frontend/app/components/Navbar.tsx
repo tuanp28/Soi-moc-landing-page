@@ -7,12 +7,13 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCart } from '@/app/context/CartContext';
+import { supabase } from '@/src/lib/supabase';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
@@ -98,23 +99,69 @@ export const Navbar: React.FC = () => {
               );
             })}
 
-            {/* Auth Link (Conditional) */}
-            {user ? (
-              <Link
-                href="/profile"
-                className={`text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 ${
-                  pathname === '/profile' ? 'text-brand-green' : 'text-brand-muted'
-                }`}
-              >
-                TÀI KHOẢN
-                {pathname === '/profile' && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+            {/* Auth Link (Conditional Popover/Menu) */}
+            {user && profile ? (
+              <div className="flex items-center gap-4 border-l border-brand-green/10 dark:border-white/10 pl-4 py-1">
+                {/* User Info & Badges */}
+                <div className="flex flex-col text-right">
+                  <span className="text-[11px] font-black text-brand-charcoal dark:text-stone-200 uppercase truncate max-w-[120px]">
+                    {profile.fullName}
+                  </span>
+                  
+                  {/* Badges */}
+                  <div className="flex gap-1 justify-end mt-0.5 select-none">
+                    {/* Role Badge */}
+                    {profile.role !== 'customer' && (
+                      <span className="px-1.5 py-0.5 text-[8px] font-bold bg-brand-green/10 text-brand-green border border-brand-green/20 uppercase tracking-widest rounded-none font-mono">
+                        {profile.role}
+                      </span>
+                    )}
+                    {/* VIP Level Badge */}
+                    <span className={`px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-none font-mono border ${
+                      profile.vipLevel === 'diamond' ? 'bg-cyan-50 dark:bg-cyan-950/20 text-cyan-700 dark:text-cyan-400 border-cyan-200' :
+                      profile.vipLevel === 'gold' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200' :
+                      profile.vipLevel === 'silver' ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-300' :
+                      'bg-emerald-50 dark:bg-emerald-950/10 text-emerald-800 dark:text-emerald-400 border-emerald-250'
+                    }`}>
+                      {profile.vipLevel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Avatar */}
+                <Link href="/profile" className="relative shrink-0 group">
+                  {profile.avatarUrl ? (
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile.fullName}
+                      className="w-8 h-8 rounded-full border border-brand-green/20 group-hover:border-brand-green transition-all"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-xs">
+                      {profile.fullName.substring(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                </Link>
+
+                {/* Dashboard Shortcut Badges */}
+                {profile.role === 'admin' && (
+                  <Link href="/admin" className="text-[10px] font-black tracking-widest text-[#C8953A] border border-[#C8953A]/20 px-2 py-1 hover:bg-[#C8953A] hover:text-white transition-all uppercase">
+                    Admin
+                  </Link>
                 )}
-              </Link>
+                
+                {(profile.role === 'staff' || profile.role === 'manager' || profile.role === 'admin') && (
+                  <Link href="/staff" className="text-[10px] font-black tracking-widest text-brand-green border border-brand-green/20 px-2 py-1 hover:bg-brand-green hover:text-white transition-all uppercase">
+                    Staff
+                  </Link>
+                )}
+
+                {(profile.role === 'vip' || profile.vipLevel !== 'normal' || profile.role === 'admin' || profile.role === 'staff' || profile.role === 'manager') && (
+                  <Link href="/vip" className="text-[10px] font-black tracking-widest text-cyan-600 border border-cyan-500/20 px-2 py-1 hover:bg-cyan-600 hover:text-white transition-all uppercase font-mono">
+                    VIP
+                  </Link>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -222,17 +269,75 @@ export const Navbar: React.FC = () => {
                 );
               })}
 
-              {/* Mobile Auth Link */}
-              {user ? (
-                <Link
-                  href="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className={`text-sm font-extrabold tracking-wider border-b border-brand-cream pb-2 ${
-                    pathname === '/profile' ? 'text-brand-green' : 'text-brand-charcoal'
-                  }`}
-                >
-                  TÀI KHOẢN
-                </Link>
+              {/* Mobile Auth Links */}
+              {user && profile ? (
+                <div className="flex flex-col gap-3 border-t border-brand-green/10 dark:border-white/10 pt-4">
+                  <div className="flex items-center gap-3">
+                    {profile.avatarUrl ? (
+                      <img
+                        src={profile.avatarUrl}
+                        alt={profile.fullName}
+                        className="w-10 h-10 rounded-full border border-brand-green/20"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-sm">
+                        {profile.fullName.substring(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-extrabold text-brand-charcoal dark:text-white">{profile.fullName}</span>
+                      <span className="text-[10px] text-brand-muted uppercase font-mono tracking-wider">{profile.role} | {profile.vipLevel}</span>
+                    </div>
+                  </div>
+                  
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs font-black tracking-widest text-brand-muted hover:text-brand-green uppercase"
+                  >
+                    Hồ Sơ Thành Viên
+                  </Link>
+
+                  {profile.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="text-xs font-black tracking-widest text-[#C8953A] uppercase"
+                    >
+                      Dashboard Admin
+                    </Link>
+                  )}
+
+                  {(profile.role === 'staff' || profile.role === 'manager' || profile.role === 'admin') && (
+                    <Link
+                      href="/staff"
+                      onClick={() => setIsOpen(false)}
+                      className="text-xs font-black tracking-widest text-brand-green uppercase"
+                    >
+                      Dashboard Staff
+                    </Link>
+                  )}
+
+                  {(profile.role === 'vip' || profile.vipLevel !== 'normal' || profile.role === 'admin' || profile.role === 'staff' || profile.role === 'manager') && (
+                    <Link
+                      href="/vip"
+                      onClick={() => setIsOpen(false)}
+                      className="text-xs font-black tracking-widest text-cyan-600 uppercase"
+                    >
+                      Đặc quyền VIP
+                    </Link>
+                  )}
+                  
+                  <button
+                    onClick={async () => {
+                      setIsOpen(false);
+                      await signOut();
+                    }}
+                    className="text-left text-xs font-black tracking-widest text-rose-600 uppercase mt-1 cursor-pointer"
+                  >
+                    Đăng Xuất
+                  </button>
+                </div>
               ) : (
                 <Link
                   href="/login"

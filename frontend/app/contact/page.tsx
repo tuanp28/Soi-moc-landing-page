@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, Send, CheckCircle, AlertCircle, Clock, Award } from 'lucide-react';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function ContactPage() {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +19,17 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.user_metadata?.full_name || prev.name,
+        email: user.email || prev.email,
+        phone: user.phone || user.user_metadata?.phone || prev.phone,
+      }));
+    }
+  }, [user]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -32,10 +46,11 @@ export default function ContactPage() {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email không đúng định dạng.';
     }
+    const cleanPhone = formData.phone.replace(/[\s().-]/g, '');
     if (!formData.phone.trim()) {
       newErrors.phone = 'Số điện thoại không được để trống.';
-    } else if (!/^[0-9+\s-]{8,15}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại phải từ 8 đến 15 chữ số.';
+    } else if (!/^(0|84|\+84)[35789][0-9]{8}$|^(0|84|\+84)2[0-9]{9}$/.test(cleanPhone)) {
+      newErrors.phone = 'Số điện thoại không hợp lệ (ví dụ: 0912 345 678).';
     }
     if (!formData.message.trim()) {
       newErrors.message = 'Nội dung liên hệ không được để trống.';
@@ -67,14 +82,23 @@ export default function ContactPage() {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          userId: user?.id || null
+        })
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
         setStatus('success');
-        setFormData({ name: '', email: '', phone: '', subject: 'Tư vấn sản phẩm', message: '' });
+        setFormData({
+          name: user ? (user.user_metadata?.full_name || '') : '',
+          email: user ? (user.email || '') : '',
+          phone: user ? (user.phone || user.user_metadata?.phone || '') : '',
+          subject: 'Tư vấn sản phẩm',
+          message: ''
+        });
         // Revert back to idle after 6 seconds
         setTimeout(() => setStatus('idle'), 6000);
       } else {
@@ -286,7 +310,10 @@ export default function ContactPage() {
                       onChange={handleChange}
                       placeholder="a@gmail.com"
                       disabled={status === 'loading'}
+                      readOnly={!!user}
                       className={`w-full bg-[#FAF6EE] dark:bg-[#111510] border px-4 py-3 text-sm rounded-none focus:outline-none focus:border-brand-green dark:focus:border-brand-gold transition-colors duration-300 ${
+                        user ? 'opacity-75 cursor-not-allowed bg-stone-100/50 dark:bg-stone-900/30' : ''
+                      } ${
                         errors.email ? 'border-rose-500' : 'border-[#e2ddd5] dark:border-white/10'
                       }`}
                     />

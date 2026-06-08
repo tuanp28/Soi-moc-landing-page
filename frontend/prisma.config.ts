@@ -1,5 +1,7 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
+
+dotenv.config({ override: true });
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -8,7 +10,5 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
-    // @ts-ignore
-    directUrl: process.env["DIRECT_URL"],
   },
 });

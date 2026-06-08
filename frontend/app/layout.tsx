@@ -5,6 +5,10 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { FloatingContact } from './components/FloatingContact';
 import { Analytics } from '@vercel/analytics/react';
+import { AuthProvider } from '@/app/context/AuthContext';
+import { CartProvider } from '@/app/context/CartContext';
+import { CartDrawer } from '@/app/components/CartDrawer';
+import { Preloader } from './components/Preloader';
 
 const playfair = Playfair_Display({
   subsets: ['latin', 'vietnamese'],
@@ -39,13 +43,37 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${playfair.variable} ${beVietnam.variable}`}>
-      <body className="bg-[#F9F4EC] text-[#1A1A1A] font-sans min-h-screen flex flex-col antialiased selection:bg-[#2D5A27] selection:text-white">
-        <Navbar />
-        <main className="flex-grow pt-20">
-          {children}
-        </main>
-        <FloatingContact />
-        <Footer />
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })()
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-brand-cream text-brand-charcoal font-sans min-h-screen flex flex-col antialiased selection:bg-brand-green selection:text-white">
+        <Preloader />
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <CartDrawer />
+            <main className="flex-grow pt-20">
+              {children}
+            </main>
+            <FloatingContact />
+            <Footer />
+          </CartProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

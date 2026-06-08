@@ -5,10 +5,10 @@ import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const FloatingContact: React.FC = () => {
-  const phone = '0979862956';
+  const phone = '0377159498';
   const facebookUrl = 'https://www.facebook.com/people/S%E1%BB%A3i-M%E1%BB%99c/100067446103740/';
   const tiktokUrl = 'https://www.tiktok.com/@si.mc37';
-  const zaloUrl = 'https://zalo.me/0979862956';
+  const zaloUrl = 'https://zalo.me/0377159498';
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none">

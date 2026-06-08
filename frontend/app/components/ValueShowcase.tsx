@@ -53,11 +53,11 @@ export const ValueShowcase: React.FC = () => {
       <div className="max-w-7xl mx-auto px-5 md:px-10 relative z-10">
         
         {/* Title Block */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-4xl mx-auto mb-16 space-y-4">
           <span className="inline-block text-xs font-black tracking-widest text-brand-green uppercase font-mono bg-brand-green-pale/50 px-3 py-1 border border-brand-green/10">
             SỨC MẠNH DINH DƯỠNG SẠCH
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-normal uppercase text-brand-charcoal font-serif leading-tight">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-normal uppercase text-brand-charcoal font-serif leading-tight md:whitespace-nowrap">
             TẠI SAO BẠN NÊN CHỌN SỢI MỘC?
           </h2>
           <p className="text-brand-muted text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">

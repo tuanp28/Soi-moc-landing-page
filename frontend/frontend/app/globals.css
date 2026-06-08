@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-vietnam), system-ui, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
+  
+  --color-brand-green: #2D5A27;
+  --color-brand-green-hover: #1f3e1b;
+  --color-brand-green-light: #4A7C3F;
+  --color-brand-green-pale: #EAF3DE;
+  --color-brand-gold: #C8953A;
+  --color-brand-gold-hover: #ab7c2d;
+  --color-brand-cream: #F9F4EC;
+  --color-brand-charcoal: #1A1A1A;
+  --color-brand-muted: #5A5A5A;
+}
+
+:root {
+  --background: #F9F4EC;
+  --foreground: #1A1A1A;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-vietnam), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+.font-serif {
+  font-family: var(--font-playfair), Georgia, serif !important;
+}
+
+.font-sans {
+  font-family: var(--font-vietnam), system-ui, sans-serif !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F9F4EC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EAF3DE;
+  border: 1px solid #4A7C3F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2D5A27;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Glassmorphism utility for light mode */
+.glassmorphism {
+  background: rgba(249, 244, 236, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

@@ -73,7 +73,7 @@ export const policies: Record<string, Policy> = {
           },
           {
             subtitle: 'Đặt hàng qua Hotline/Zalo',
-            text: 'Gọi điện thoại hoặc nhắn tin trực tiếp đến số điện thoại chăm sóc khách hàng: 0979862956 để được nhân viên tư vấn trực tiếp và lên đơn thủ công.'
+            text: 'Gọi điện thoại hoặc nhắn tin trực tiếp đến số điện thoại chăm sóc khách hàng: 0377159498 để được nhân viên tư vấn trực tiếp và lên đơn thủ công.'
           }
         ]
       },
@@ -83,7 +83,7 @@ export const policies: Record<string, Policy> = {
       },
       {
         title: '3. Thay Đổi Hoặc Hủy Đơn Hàng',
-        content: 'Khách hàng có nhu cầu thay đổi chủng loại sản phẩm, số lượng hoặc hủy đơn hàng đã đặt vui lòng liên hệ hotline: 0979862956 trước khi đơn hàng được bàn giao cho đơn vị vận chuyển (thường là trước 14h hàng ngày).'
+        content: 'Khách hàng có nhu cầu thay đổi chủng loại sản phẩm, số lượng hoặc hủy đơn hàng đã đặt vui lòng liên hệ hotline: 0377159498 trước khi đơn hàng được bàn giao cho đơn vị vận chuyển (thường là trước 14h hàng ngày).'
       }
     ]
   },
@@ -113,7 +113,7 @@ export const policies: Record<string, Policy> = {
       },
       {
         title: '2. Điều Kiện Đổi Trả',
-        content: 'Sản phẩm đổi trả phải đáp ứng các yêu cầu cơ bản: Thời gian phản hồi trong vòng 7 ngày kể từ khi nhận hàng. Khách hàng vui lòng chụp ảnh hoặc quay video ngắn tình trạng bao bì/sản phẩm lỗi khi khui hàng và gửi qua Zalo 0979862956 để được xử lý ngay lập tức.'
+        content: 'Sản phẩm đổi trả phải đáp ứng các yêu cầu cơ bản: Thời gian phản hồi trong vòng 7 ngày kể từ khi nhận hàng. Khách hàng vui lòng chụp ảnh hoặc quay video ngắn tình trạng bao bì/sản phẩm lỗi khi khui hàng và gửi qua Zalo 0377159498 để được xử lý ngay lập tức.'
       },
       {
         title: '3. Chi Phí Đổi Trả',

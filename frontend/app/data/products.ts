@@ -44,8 +44,7 @@ export const products: Product[] = [
       fat: '1.2g'
     },
     sizes: [
-      { weight: '500g', price: 35000, priceStr: '35.000đ', target: 'Phù hợp 2-3 người ăn' },
-      { weight: '1kg', price: 65000, priceStr: '65.000đ', target: 'Gia đình 4-5 người ăn' }
+      { weight: '500g', price: 35000, priceStr: '35.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'corn',
     badge: 'BEST SELLER'
@@ -68,8 +67,7 @@ export const products: Product[] = [
       fat: '1.1g'
     },
     sizes: [
-      { weight: '500g', price: 32000, priceStr: '32.000đ', target: 'Phù hợp 2-3 người ăn' },
-      { weight: '1kg', price: 64000, priceStr: '64.000đ', target: 'Gia đình 4-5 người ăn' }
+      { weight: '500g', price: 32000, priceStr: '32.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'corn',
     badge: 'NEW'
@@ -115,7 +113,7 @@ export const products: Product[] = [
       fat: '0.9g'
     },
     sizes: [
-      { weight: '500g', price: 38000, priceStr: '38.000đ', target: 'Phù hợp 2-3 người ăn' }
+      { weight: '500g', price: 35000, priceStr: '35.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'specialty'
   },

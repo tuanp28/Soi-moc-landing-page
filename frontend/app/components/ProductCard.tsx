@@ -82,7 +82,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <Link
             href={`/products/${product.id}`}
-            className="px-4 py-2.5 bg-brand-charcoal hover:bg-brand-green text-white hover:text-white transition-all duration-300 text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5 cursor-pointer hover:shadow-xs active:scale-95"
+            className="px-4 py-2.5 bg-brand-charcoal hover:bg-brand-green text-white dark:text-brand-cream hover:text-white transition-all duration-300 text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5 cursor-pointer hover:shadow-xs active:scale-95"
           >
             CHI TIẾT
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300" />

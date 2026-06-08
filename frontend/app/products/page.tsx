@@ -7,6 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 type CategoryFilter = 'all' | 'corn' | 'specialty';
 
+const LeafSVG: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17 8C8 10 5.9 16.1 5.1 19C7.4 18.2 13.5 16 15.5 7.1C16.2 4.1 18.3 2 18.3 2S16.2 4.1 17 8Z" />
+    <path d="M2 22C2 22 5.5 17.5 11.5 16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
 export default function ProductsPage() {
   const [filter, setFilter] = useState<CategoryFilter>('all');
 
@@ -22,11 +29,85 @@ export default function ProductsPage() {
   ];
 
   return (
-    <div className="bg-brand-cream text-brand-charcoal min-h-[80vh] py-16 font-sans">
-      <div className="max-w-7xl mx-auto px-5 md:px-10">
+    <div className="relative min-h-[90vh] bg-gradient-to-b from-[#F2EADF] via-[#FAF6EE] to-[#F2EADF] dark:from-[#151A13] dark:via-[#111510] dark:to-[#151A13] py-16 md:py-24 overflow-hidden font-sans text-brand-charcoal">
+      
+      {/* Background Graphic Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2ddd5_1px,transparent_1px),linear-gradient(to_bottom,#e2ddd5_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(250,246,238,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(250,246,238,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      <div className="absolute inset-0 bg-radial-[circle_at_center,transparent_30%,#F9F4EC_95%] dark:bg-radial-[circle_at_center,transparent_30%,#111510_95%] pointer-events-none" />
+
+      {/* Decorative Dashed Arc Circles */}
+      <div className="absolute top-[20%] right-[-100px] w-[500px] h-[500px] rounded-full border border-dashed border-[#2D5A27]/10 dark:border-white/5 pointer-events-none z-0" />
+      <div className="absolute bottom-[20%] left-[-150px] w-[400px] h-[400px] rounded-full border border-dashed border-[#2D5A27]/8 dark:border-white/5 pointer-events-none z-0" />
+
+      {/* Glowing Ambient Mesh Orbs */}
+      <div className="absolute top-1/4 left-1/10 w-[350px] h-[350px] rounded-full bg-brand-green/8 dark:bg-brand-green/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/10 w-[450px] h-[450px] rounded-full bg-brand-gold/10 dark:bg-brand-gold/5 blur-3xl pointer-events-none" />
+
+      {/* Drifting Organic Particles (Falling Blurry Green Leaves) */}
+      <motion.div
+        animate={{
+          y: [-20, 800],
+          x: [0, 40, 0],
+          rotate: [0, 240],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[5%] left-[25%] w-5 h-3 bg-[#2D5A27]/40 dark:bg-brand-green/25 rounded-full blur-[1px] pointer-events-none z-0"
+      />
+      <motion.div
+        animate={{
+          y: [-20, 600],
+          x: [0, -30, 0],
+          rotate: [45, 285],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{ duration: 18, repeat: Infinity, delay: 5, ease: "linear" }}
+        className="absolute top-[15%] left-[65%] w-4.5 h-2.5 bg-[#2D5A27]/35 dark:bg-brand-green/20 rounded-full blur-[1.2px] pointer-events-none z-0"
+      />
+      <motion.div
+        animate={{
+          y: [-20, 700],
+          x: [0, 35, 0],
+          rotate: [90, 330],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{ duration: 22, repeat: Infinity, delay: 10, ease: "linear" }}
+        className="absolute top-[10%] left-[85%] w-3.5 h-2 bg-[#C8953A]/45 dark:bg-brand-gold/25 rounded-full blur-[0.8px] pointer-events-none z-0"
+      />
+
+      {/* Floating Organic Leaves */}
+      <motion.div
+        animate={{
+          y: [0, -18, 0],
+          x: [0, 12, 0],
+          rotate: [0, 30, 0]
+        }}
+        transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
+        className="absolute top-[15%] left-[5%] text-brand-green/15 w-8 h-8 pointer-events-none hidden lg:block z-0"
+      >
+        <LeafSVG className="w-full h-full text-brand-green/10" />
+      </motion.div>
+      <motion.div
+        animate={{
+          y: [0, 24, 0],
+          x: [0, -15, 0],
+          rotate: [0, -45, 0]
+        }}
+        transition={{ repeat: Infinity, duration: 10, ease: 'easeInOut' }}
+        className="absolute bottom-[30%] right-[5%] text-brand-gold/15 w-10 h-10 pointer-events-none hidden lg:block z-0"
+      >
+        <LeafSVG className="w-full h-full text-brand-gold/10" />
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-5 md:px-10 relative z-10">
         
         {/* Header Block */}
-        <div className="border-b border-brand-green/10 pb-10 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="border-b border-brand-green/10 pb-10 mb-12"
+        >
           <span className="block text-xs font-black tracking-widest text-brand-green uppercase font-mono">
             SHOP CATALOG
           </span>
@@ -36,7 +117,7 @@ export default function ProductsPage() {
           <p className="text-brand-muted text-sm font-medium mt-3 max-w-xl">
             Lựa chọn dinh dưỡng tối ưu từ hạt ngô quê và nông sản vùng cao Cao Bằng. 100% tự nhiên, sạch và lành.
           </p>
-        </div>
+        </motion.div>
 
         {/* Filter Navigation Tabs */}
         <div className="flex flex-wrap gap-2 md:gap-4 mb-12 border-b border-brand-green/10 pb-6">

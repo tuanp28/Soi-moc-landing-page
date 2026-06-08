@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Flame, Shield, Activity } from 'lucide-react';
+import { useAuth } from '@/app/context/AuthContext';
 
 const LeafSVG: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -14,13 +15,64 @@ const LeafSVG: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export const Hero: React.FC = () => {
+  const { user } = useAuth();
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#F2EADF] via-[#FAF6EE] to-[#F2EADF] pt-24 lg:pt-32 pb-16 border-b border-brand-green/10">
-      {/* Background Graphic Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#2D5A2703_1px,transparent_1px),linear-gradient(to_bottom,#2D5A2703_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#F2EADF] via-[#FAF6EE] to-[#F2EADF] pt-24 lg:pt-32 pb-16 border-b border-[#e2ddd5] dark:border-brand-green/10">
+      {/* Background Graphic Grid - High Visibility */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2ddd5_1px,transparent_1px),linear-gradient(to_bottom,#e2ddd5_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(250,246,238,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(250,246,238,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
       
       {/* Radial Gradient Overlay */}
       <div className="absolute inset-0 bg-radial-[circle_at_center,transparent_20%,#F9F4EC_90%] pointer-events-none" />
+
+      {/* Decorative Dashed Arc Circles */}
+      <div className="absolute top-[40%] right-[-100px] w-[500px] h-[500px] rounded-full border border-dashed border-[#2D5A27]/10 dark:border-white/5 pointer-events-none z-0" />
+      <div className="absolute bottom-[10%] left-[-150px] w-[400px] h-[400px] rounded-full border border-dashed border-[#2D5A27]/8 dark:border-white/5 pointer-events-none z-0" />
+
+      {/* Drifting Organic Particles (Falling Blurry Oval Green Leaves) */}
+      <motion.div
+        animate={{
+          y: [-20, 650],
+          x: [0, 30, 0],
+          rotate: [0, 200],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{
+          duration: 14,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+        className="absolute top-[5%] left-[38%] w-5 h-3 bg-[#2D5A27]/40 dark:bg-brand-green/25 rounded-full blur-[1px] pointer-events-none z-0"
+      />
+      <motion.div
+        animate={{
+          y: [-20, 500],
+          x: [0, -25, 0],
+          rotate: [45, 245],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{
+          duration: 17,
+          repeat: Infinity,
+          delay: 4,
+          ease: "linear"
+        }}
+        className="absolute top-[15%] left-[58%] w-4.5 h-2.5 bg-[#2D5A27]/35 dark:bg-brand-green/20 rounded-full blur-[1.2px] pointer-events-none z-0"
+      />
+      <motion.div
+        animate={{
+          y: [-20, 580],
+          x: [0, 35, 0],
+          rotate: [90, 290],
+          opacity: [0, 0.95, 0.95, 0]
+        }}
+        transition={{
+          duration: 21,
+          repeat: Infinity,
+          delay: 8,
+          ease: "linear"
+        }}
+        className="absolute top-[10%] left-[82%] w-3.5 h-2 bg-[#C8953A]/45 dark:bg-brand-gold/25 rounded-full blur-[0.8px] pointer-events-none z-0"
+      />
 
       {/* Glowing Ambient Mesh Orbs */}
       <div className="absolute top-1/4 left-1/4 w-[380px] h-[380px] rounded-full bg-brand-green/12 blur-3xl pointer-events-none" />
@@ -52,8 +104,10 @@ export const Hero: React.FC = () => {
       </motion.div>
 
       {/* Decorative Giant Background Slogan */}
-      <div className="absolute -left-10 bottom-10 text-[12vw] font-black leading-none text-brand-green/[0.04] select-none tracking-tighter uppercase font-sans">
-        JUST EAT IT
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none z-0">
+        <span className="text-[20vw] font-black tracking-widest text-[#2D5A27]/[0.03] dark:text-white/[0.015] font-serif uppercase">
+          SỢI MỘC
+        </span>
       </div>
 
       <div className="max-w-7xl mx-auto px-5 md:px-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10 py-10">
@@ -134,7 +188,7 @@ export const Hero: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid grid-cols-3 gap-4 border-y border-brand-green/10 py-4 max-w-lg font-mono text-[10px] tracking-widest text-brand-muted uppercase"
+            className="grid grid-cols-3 gap-4 border-y border-[#e2ddd5] dark:border-brand-gold/50 py-4 max-w-lg font-mono text-[10px] tracking-widest text-brand-muted uppercase"
           >
             <div className="flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-brand-green" />
@@ -143,7 +197,7 @@ export const Hero: React.FC = () => {
                 <p className="text-[8px] text-brand-muted/70">Không chất bảo quản</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 border-x border-brand-green/10 px-4">
+            <div className="flex items-center gap-1.5 border-x border-[#e2ddd5] dark:border-brand-gold/50 px-4">
               <Activity className="w-4 h-4 text-brand-green" />
               <div>
                 <p className="text-brand-charcoal font-bold">SLOW CARBS</p>
@@ -159,26 +213,28 @@ export const Hero: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Action CTA Buttons */}
+          {/* Action CTA Buttons & Scroll Indicator */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap items-center gap-4 pt-4"
+            className="flex flex-wrap items-center gap-6 pt-4"
           >
-            <Link
-              href="/products"
-              className="px-8 py-4 bg-gradient-to-r from-brand-green to-brand-green-hover text-white font-extrabold text-xs tracking-widest hover:shadow-[0_0_20px_rgba(45,90,39,0.4)] active:scale-95 transition-all duration-300 flex items-center gap-2.5 uppercase group rounded-none border border-brand-green/20"
-            >
-              XEM SẢN PHẨM PREMIUM
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
-            </Link>
-            <Link
-              href="/about"
-              className="px-8 py-4 border border-brand-green/20 hover:border-brand-green text-brand-green hover:text-white font-extrabold text-xs tracking-widest hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] active:scale-95 transition-all duration-300 uppercase rounded-none"
-            >
-              TÌM HIỂU CÂU CHUYỆN
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/products"
+                className="px-8 py-4 bg-brand-green hover:bg-brand-green-hover text-white font-extrabold text-xs tracking-widest hover:shadow-[0_4px_12px_rgba(45,90,39,0.3)] active:scale-95 transition-all duration-300 flex items-center gap-2.5 uppercase group rounded-none border border-brand-green/20"
+              >
+                KHÁM PHÁ SẢN PHẨM
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+              </Link>
+              <Link
+                href={user ? "/profile" : "/login"}
+                className="hero-login-btn px-8 py-4 border border-[#2D5A27]/20 dark:border-brand-gold/70 hover:border-brand-gold dark:hover:border-brand-gold font-extrabold text-xs tracking-widest active:scale-95 transition-all duration-300 uppercase rounded-none"
+              >
+                {user ? "TÀI KHOẢN" : "ĐĂNG NHẬP"}
+              </Link>
+            </div>
           </motion.div>
         </div>
 

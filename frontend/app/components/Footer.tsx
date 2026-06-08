@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
               <Phone className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Hotline / Zalo:</p>
-                <p className="hover:text-green-500 transition-colors">0979.862.956</p>
+                <p className="hover:text-green-500 transition-colors">0377.159.498</p>
               </div>
             </li>
             <li className="flex items-start gap-2 text-stone-300 text-xs">
@@ -81,7 +81,7 @@ export const Footer: React.FC = () => {
               <Mail className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-white">Email:</p>
-                <p>contact@soimoc.com</p>
+                <p>soimoc201@gmail.com</p>
               </div>
             </li>
           </ul>

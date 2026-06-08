@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, use } from 'react';
-import { products } from '../../data/products';
-import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, use } from 'react';
+import { products as localProducts, Product } from '../../data/products';
+import { supabase } from '@/src/lib/supabase';
+import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCart } from '@/app/context/CartContext';
+import { ReviewSection } from '@/app/components/ReviewSection';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,20 +17,96 @@ interface PageProps {
 
 export default function ProductDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const product = products.find((p) => p.id === resolvedParams.id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedWeight, setSelectedWeight] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
+  const [copied, setCopied] = useState(false);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProductDetail = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', resolvedParams.id)
+          .single();
+
+        if (error || !data) {
+          const local = localProducts.find((p) => p.id === resolvedParams.id);
+          if (local) {
+            setProduct(local);
+            if (local.sizes && local.sizes.length > 0) {
+              setSelectedWeight(local.sizes[0].weight);
+            }
+          }
+        } else {
+          const mapped: Product = {
+            id: data.id,
+            name: data.name,
+            tagline: data.tagline || '',
+            description: data.description || '',
+            details: data.details || '',
+            image: data.image || '',
+            images: data.images || (data.image ? [data.image] : []),
+            features: data.features || [],
+            cookingTime: data.cookingTime || data.cooking_time || '',
+            nutrition: data.nutrition || {
+              calories: data.calories || '',
+              carbs: data.carbs || '',
+              protein: data.protein || '',
+              fiber: data.fiber || '',
+              fat: data.fat || ''
+            },
+            sizes: data.sizes || [],
+            category: data.category || 'specialty',
+            badge: data.badge || null
+          };
+          setProduct(mapped);
+          if (mapped.sizes && mapped.sizes.length > 0) {
+            setSelectedWeight(mapped.sizes[0].weight);
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase product detail query error, using local fallback:', err);
+        const local = localProducts.find((p) => p.id === resolvedParams.id);
+        if (local) {
+          setProduct(local);
+          if (local.sizes && local.sizes.length > 0) {
+            setSelectedWeight(local.sizes[0].weight);
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
+  }, [resolvedParams.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center bg-[#F9F4EC] gap-4">
+        <div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-black tracking-widest text-brand-muted uppercase font-mono animate-pulse">
+          Đang tải chi tiết sản phẩm...
+        </p>
+      </div>
+    );
+  }
 
   if (!product) {
     notFound();
   }
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedWeight, setSelectedWeight] = useState(product.sizes[0].weight);
-  const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
-  const [copied, setCopied] = useState(false);
   
   // Size price selection
-  const sizeInfo = product.sizes.find((s) => s.weight === selectedWeight) || product.sizes[0];
+  const sizeInfo = product.sizes.find((s) => s.weight === selectedWeight) || product.sizes[0] || {
+    weight: '500g', price: 0, priceStr: 'Liên hệ', target: ''
+  };
 
   const handleConsultation = () => {
     const text = `Xin chào Sợi Mộc, tôi đang xem trang web và muốn nhận tư vấn đặt mua sản phẩm: ${product.name} (Túi ${selectedWeight}) - Giá: ${sizeInfo.priceStr}`;
@@ -35,9 +114,15 @@ export default function ProductDetailPage({ params }: PageProps) {
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
-        window.open('https://zalo.me/0979862956', '_blank');
+        window.open('https://zalo.me/0377159498', '_blank');
       }, 1200);
     });
+  };
+
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product, selectedWeight);
+    }
   };
 
   return (
@@ -232,29 +317,39 @@ export default function ProductDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Consultation Button */}
-              <div className="relative group">
+              {/* Action Buttons: Add to Cart & Consultation */}
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                  onClick={handleConsultation}
-                  className="w-full py-5 bg-gradient-to-r from-brand-green via-brand-green-hover to-brand-green text-white font-black text-xs tracking-widest hover:shadow-[0_0_25px_rgba(45,90,39,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer relative overflow-hidden select-none"
+                  onClick={handleAddToCart}
+                  className="flex-1 py-5 border-2 border-brand-green hover:bg-brand-green text-brand-green hover:text-white font-black text-xs tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer hover:shadow-xs select-none active:scale-[0.99]"
                 >
-                  <span className="absolute inset-0 w-full h-full bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  <MessageSquare className="w-4 h-4 fill-white/10 text-white animate-pulse" />
-                  {copied ? 'ĐÃ COPY LỜI NHẮN! ĐANG MỞ ZALO...' : 'NHẬN TƯ VẤN & ĐẶT MUA QUA ZALO'}
+                  <ShoppingBag className="w-4 h-4" />
+                  THÊM VÀO GIỎ HÀNG
                 </button>
 
-                <AnimatePresence>
-                  {copied && (
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold z-10"
-                    >
-                      ✓ Lời nhắn đã được lưu. Hãy dán (Paste) vào ô chat Zalo sắp mở ra!
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                <div className="flex-1 relative group">
+                  <button
+                    onClick={handleConsultation}
+                    className="w-full py-5 bg-gradient-to-r from-brand-green via-brand-green-hover to-brand-green text-white font-black text-xs tracking-widest hover:shadow-[0_0_25px_rgba(45,90,39,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer relative overflow-hidden select-none"
+                  >
+                    <span className="absolute inset-0 w-full h-full bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    <MessageSquare className="w-4 h-4 fill-white/10 text-white animate-pulse" />
+                    {copied ? 'ĐÃ COPY LỜI NHẮN!' : 'MUA NHANH QUA ZALO'}
+                  </button>
+
+                  <AnimatePresence>
+                    {copied && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold z-10"
+                      >
+                        ✓ Lời nhắn đã lưu. Dán (Paste) vào Zalo sắp mở!
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {/* Trust signals indicators block */}
@@ -370,6 +465,9 @@ export default function ProductDetailPage({ params }: PageProps) {
         </div>
 
       </div>
+      
+      {/* Reviews Section */}
+      <ReviewSection />
     </div>
   );
 }

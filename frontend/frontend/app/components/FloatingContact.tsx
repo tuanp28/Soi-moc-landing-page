@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 export const FloatingContact: React.FC = () => {
   const phone = '0979862956';
   const facebookUrl = 'https://www.facebook.com/people/S%E1%BB%A3i-M%E1%BB%99c/100067446103740/';
-  const tiktokUrl = 'https://www.tiktok.com/@si.mc37';
+  const tiktokUrl = 'https://www.tiktok.com/@soimoc201';
   const zaloUrl = 'https://zalo.me/0979862956';
 
   return (

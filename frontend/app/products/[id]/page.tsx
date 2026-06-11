@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, use } from 'react';
 import { products as localProducts, Product } from '../../data/products';
-import { supabase } from '@/src/lib/supabase';
 import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,89 +16,21 @@ interface PageProps {
 
 export default function ProductDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedWeight, setSelectedWeight] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
-  const [copied, setCopied] = useState(false);
-  const { addToCart } = useCart();
-
-  useEffect(() => {
-    const fetchProductDetail = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', resolvedParams.id)
-          .single();
-
-        if (error || !data) {
-          const local = localProducts.find((p) => p.id === resolvedParams.id);
-          if (local) {
-            setProduct(local);
-            if (local.sizes && local.sizes.length > 0) {
-              setSelectedWeight(local.sizes[0].weight);
-            }
-          }
-        } else {
-          const mapped: Product = {
-            id: data.id,
-            name: data.name,
-            tagline: data.tagline || '',
-            description: data.description || '',
-            details: data.details || '',
-            image: data.image || '',
-            images: data.images || (data.image ? [data.image] : []),
-            features: data.features || [],
-            cookingTime: data.cookingTime || data.cooking_time || '',
-            nutrition: data.nutrition || {
-              calories: data.calories || '',
-              carbs: data.carbs || '',
-              protein: data.protein || '',
-              fiber: data.fiber || '',
-              fat: data.fat || ''
-            },
-            sizes: data.sizes || [],
-            category: data.category || 'specialty',
-            badge: data.badge || null
-          };
-          setProduct(mapped);
-          if (mapped.sizes && mapped.sizes.length > 0) {
-            setSelectedWeight(mapped.sizes[0].weight);
-          }
-        }
-      } catch (err) {
-        console.warn('Supabase product detail query error, using local fallback:', err);
-        const local = localProducts.find((p) => p.id === resolvedParams.id);
-        if (local) {
-          setProduct(local);
-          if (local.sizes && local.sizes.length > 0) {
-            setSelectedWeight(local.sizes[0].weight);
-          }
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProductDetail();
-  }, [resolvedParams.id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center bg-[#F9F4EC] gap-4">
-        <div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-black tracking-widest text-brand-muted uppercase font-mono animate-pulse">
-          Đang tải chi tiết sản phẩm...
-        </p>
-      </div>
-    );
-  }
+  
+  // Find product from static list directly to ensure instant loading
+  const product = localProducts.find((p) => p.id === resolvedParams.id);
 
   if (!product) {
     notFound();
   }
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedWeight, setSelectedWeight] = useState<string>(
+    product.sizes && product.sizes.length > 0 ? product.sizes[0].weight : ''
+  );
+  const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
+  const [copied, setCopied] = useState(false);
+  const { addToCart } = useCart();
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
   

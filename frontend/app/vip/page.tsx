@@ -3,54 +3,13 @@
 import React from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { 
-  Award, 
   Sparkles, 
   Crown, 
   Percent, 
-  Package, 
-  Gem, 
-  BadgeCheck, 
-  ChevronRight,
   TrendingUp
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
-
-interface VipProduct {
-  id: string;
-  name: string;
-  image: string;
-  originalPrice: number;
-  description: string;
-  isExclusive: boolean;
-}
-
-const vipProducts: VipProduct[] = [
-  {
-    id: "vip-1",
-    name: "Phở Ngô Cao Cấp - VIP Special Box (Hộp Quà Tặng)",
-    image: "/images/product-combo.jpg",
-    originalPrice: 180000,
-    description: "Phiên bản giới hạn tuyển chọn những sợi phở ngô mộc mạc tốt nhất từ Hà Giang. Thích hợp làm quà tặng cao cấp cho gia đình.",
-    isExclusive: true
-  },
-  {
-    id: "vip-2",
-    name: "Bún Ngô Thượng Hạng - Organic Export Edition",
-    image: "/images/bun-ngo-details.jpg",
-    originalPrice: 150000,
-    description: "Sản xuất theo tiêu chuẩn hữu cơ xuất khẩu, sợi bún ngô dai ngon mộc mạc đặc biệt giàu dinh dưỡng hơn.",
-    isExclusive: true
-  },
-  {
-    id: "vip-3",
-    name: "Bột Ngô Hữu Cơ Hà Giang - Dinh Dưỡng Toàn Diện",
-    image: "/images/phở-ngô-nguyên-liệu.jpg",
-    originalPrice: 95000,
-    description: "Bột ngô xay đá truyền thống nguyên cám, giữ trọn vẹn chất xơ, vitamin và khoáng chất tự nhiên.",
-    isExclusive: false
-  }
-];
 
 function VipDashboard() {
   const { profile } = useAuth();
@@ -78,7 +37,8 @@ function VipDashboard() {
           textColor: 'text-cyan-400',
           glowBg: 'bg-cyan-500/10',
           badgeBg: 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30',
-          slogan: 'Trải nghiệm đỉnh cao của dịch vụ và đặc quyền thượng lưu'
+          slogan: 'Trải nghiệm đỉnh cao của dịch vụ và đặc quyền thượng lưu',
+          bannerText: 'text-white'
         };
       case 'gold':
         return {
@@ -87,7 +47,8 @@ function VipDashboard() {
           textColor: 'text-[#C8953A]',
           glowBg: 'bg-[#C8953A]/10',
           badgeBg: 'bg-[#C8953A]/25 text-[#FAF6EE] border-[#C8953A]/40',
-          slogan: 'Hội viên cao cấp cùng những chương trình quà tặng giá trị'
+          slogan: 'Hội viên cao cấp cùng những chương trình quà tặng giá trị',
+          bannerText: 'text-white'
         };
       case 'silver':
         return {
@@ -96,16 +57,29 @@ function VipDashboard() {
           textColor: 'text-stone-300',
           glowBg: 'bg-stone-500/10',
           badgeBg: 'bg-stone-500/20 text-stone-200 border-stone-400/40',
-          slogan: 'Khởi đầu tích lũy ưu đãi hấp dẫn dành riêng cho hội viên'
+          slogan: 'Khởi đầu tích lũy ưu đãi hấp dẫn dành riêng cho hội viên',
+          bannerText: 'text-white'
         };
       default:
+        if (profile && ['staff', 'manager', 'admin'].includes(profile.role)) {
+          return {
+            gradient: 'from-[#1a3817] via-[#2D5A27] to-[#142812] border-brand-green/20',
+            badgeText: 'Nhân Sự Sợi Mộc',
+            textColor: 'text-emerald-400',
+            glowBg: 'bg-emerald-500/10',
+            badgeBg: 'bg-emerald-500/20 text-emerald-250 border-emerald-400/30',
+            slogan: 'Đặc quyền trải nghiệm sản phẩm tối đa dành cho nhân viên',
+            bannerText: 'text-white'
+          };
+        }
         return {
-          gradient: 'from-[#1a3817] via-[#2D5A27] to-[#142812] border-brand-green/20',
-          badgeText: 'Nhân Sự Sợi Mộc',
-          textColor: 'text-emerald-400',
-          glowBg: 'bg-emerald-500/10',
-          badgeBg: 'bg-emerald-500/20 text-emerald-250 border-emerald-400/30',
-          slogan: 'Đặc quyền trải nghiệm sản phẩm tối đa dành cho nhân viên'
+          gradient: 'from-[#2D5A27] via-[#3d7a36] to-[#2D5A27] border-brand-green/20',
+          badgeText: 'Tiêu chuẩn (Normal)',
+          textColor: 'text-brand-green-light font-bold',
+          glowBg: 'bg-brand-green/10',
+          badgeBg: 'bg-brand-green/20 text-stone-205 border-brand-green/35',
+          slogan: 'Tích lũy chi tiêu từ 500.000đ để thăng cấp lên VIP Bạc và nhận ưu đãi giảm giá!',
+          bannerText: 'text-white'
         };
     }
   };
@@ -130,7 +104,7 @@ function VipDashboard() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={`w-full bg-gradient-to-br ${theme.gradient} text-white border p-8 md:p-10 shadow-2xl relative flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden`}
+          className={`w-full bg-gradient-to-br ${theme.gradient} ${theme.bannerText} border p-8 md:p-10 shadow-2xl relative flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent_60%)] pointer-events-none" />
           
@@ -163,7 +137,7 @@ function VipDashboard() {
         </motion.div>
 
         {/* Benefits & Perks Showcase grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Perk 1: VIP Prices */}
           <div className="bg-white dark:bg-[#171E15] border border-[#2D5A27]/10 dark:border-white/10 p-6 space-y-4 shadow-sm">
@@ -176,18 +150,7 @@ function VipDashboard() {
             </p>
           </div>
 
-          {/* Perk 2: Exclusive Products */}
-          <div className="bg-white dark:bg-[#171E15] border border-[#2D5A27]/10 dark:border-white/10 p-6 space-y-4 shadow-sm">
-            <div className="w-10 h-10 rounded-full bg-cyan-50 dark:bg-cyan-950/20 text-cyan-700 dark:text-cyan-400 flex items-center justify-center shrink-0">
-              <Package className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-black uppercase tracking-wider font-mono">Sản phẩm độc quyền</h3>
-            <p className="text-xs text-brand-muted leading-relaxed font-medium">
-              Quyền mua các dòng sản phẩm giới hạn (Special Editions, Combo Quà tặng) chỉ dành riêng cho hội viên VIP. Người dùng phổ thông sẽ không thể nhìn thấy hoặc đặt hàng.
-            </p>
-          </div>
-
-          {/* Perk 3: Support Priority */}
+          {/* Perk 2: Support Priority */}
           <div className="bg-white dark:bg-[#171E15] border border-[#2D5A27]/10 dark:border-white/10 p-6 space-y-4 shadow-sm">
             <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5" />
@@ -196,68 +159,6 @@ function VipDashboard() {
             <p className="text-xs text-brand-muted leading-relaxed font-medium">
               Đơn hàng của hội viên VIP luôn được xử lý và vận chuyển ưu tiên hàng đầu, đi kèm kênh liên lạc Zalo Hotline tư vấn trực tiếp 24/7.
             </p>
-          </div>
-        </div>
-
-        {/* Dynamic Pricing and Exclusive Products Showcase */}
-        <div className="space-y-6">
-          <div className="border-b border-[#2D5A27]/10 dark:border-white/10 pb-4">
-            <span className="text-[9px] font-black tracking-widest text-[#2D5A27] dark:text-brand-green-light uppercase font-mono">VIP PRODUCTS CATALOG</span>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif uppercase text-brand-charcoal dark:text-white mt-1">Sản Phẩm Độc Quyền & Giá Ưu Đãi VIP</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {vipProducts.map((product) => {
-              const vipPrice = calculateVipPrice(product.originalPrice);
-              return (
-                <div 
-                  key={product.id}
-                  className="bg-white dark:bg-[#171E15] border border-[#2D5A27]/10 dark:border-white/10 shadow-xs flex flex-col justify-between overflow-hidden relative group"
-                >
-                  {/* Badge Exclusive */}
-                  {product.isExclusive && (
-                    <div className="absolute top-3 left-3 bg-cyan-600/90 text-white border border-cyan-400/20 px-2 py-1 text-[8px] font-black tracking-wider uppercase font-mono z-10 flex items-center gap-1 shadow-sm">
-                      <Gem className="w-3 h-3" />
-                      Chỉ cho VIP
-                    </div>
-                  )}
-
-                  {/* Product image mockup */}
-                  <div className="aspect-square bg-brand-green-pale dark:bg-stone-900 border-b border-brand-green/5 dark:border-white/5 relative overflow-hidden flex items-center justify-center text-5xl">
-                    🌾
-                  </div>
-
-                  {/* Product Details */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-1.5">
-                      <h3 className="font-extrabold text-sm text-[#1A1A1A] dark:text-stone-200 line-clamp-2 leading-relaxed">
-                        {product.name}
-                      </h3>
-                      <p className="text-[11px] text-brand-muted leading-relaxed font-medium line-clamp-3">
-                        {product.description}
-                      </p>
-                    </div>
-
-                    {/* Price calculation block */}
-                    <div className="pt-4 border-t border-brand-green/5 dark:border-white/5 flex items-end justify-between">
-                      <div>
-                        <p className="text-[8px] text-brand-muted uppercase tracking-widest font-mono">Giá thường</p>
-                        <p className="text-xs text-[#5A5A5A] dark:text-stone-400 font-sans font-bold line-through mt-0.5">
-                          {product.originalPrice.toLocaleString('vi-VN')}đ
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-[8px] text-[#C8953A] uppercase tracking-widest font-bold font-mono">Giá VIP của bạn</p>
-                        <p className="text-base font-black text-brand-green dark:text-brand-green-light font-sans mt-0.5">
-                          {vipPrice.toLocaleString('vi-VN')}đ
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
 
@@ -275,7 +176,6 @@ function VipDashboard() {
                   <th className="p-4.5">Hạng Thành Viên</th>
                   <th className="p-4.5">Mức Chiết Khấu</th>
                   <th className="p-4.5">Quà Tặng Sinh Nhật</th>
-                  <th className="p-4.5">Sản Phẩm Độc Quyền</th>
                   <th className="p-4.5">Dịch Vụ Ưu Tiên</th>
                 </tr>
               </thead>
@@ -287,7 +187,6 @@ function VipDashboard() {
                   </td>
                   <td className="p-4.5">0%</td>
                   <td className="p-4.5">Không</td>
-                  <td className="p-4.5 text-rose-500">✕ Không</td>
                   <td className="p-4.5">Tiêu chuẩn</td>
                 </tr>
 
@@ -298,7 +197,6 @@ function VipDashboard() {
                   </td>
                   <td className="p-4.5 font-mono font-bold text-stone-700 dark:text-stone-300">5%</td>
                   <td className="p-4.5">Voucher 50K</td>
-                  <td className="p-4.5 text-cyan-600">✓ Có quyền mua</td>
                   <td className="p-4.5">Hỗ trợ nhanh</td>
                 </tr>
 
@@ -309,7 +207,6 @@ function VipDashboard() {
                   </td>
                   <td className="p-4.5 font-mono font-bold text-[#C8953A]">10%</td>
                   <td className="p-4.5">Hộp quà đặc biệt + 100K</td>
-                  <td className="p-4.5 text-cyan-600">✓ Có quyền mua</td>
                   <td className="p-4.5 font-bold text-brand-green dark:text-brand-green-light">✓ CSKH Ưu tiên</td>
                 </tr>
 
@@ -320,7 +217,6 @@ function VipDashboard() {
                   </td>
                   <td className="p-4.5 font-mono font-bold text-cyan-500">15%</td>
                   <td className="p-4.5">Bộ Combo Premium + 200K</td>
-                  <td className="p-4.5 text-cyan-600">✓ Có quyền mua</td>
                   <td className="p-4.5 font-bold text-cyan-500">👑 CSKH Cao Cấp 24/7</td>
                 </tr>
               </tbody>
@@ -335,7 +231,7 @@ function VipDashboard() {
 
 export default function VipPage() {
   return (
-    <ProtectedRoute allowedVipLevels={['silver', 'gold', 'diamond']}>
+    <ProtectedRoute>
       <VipDashboard />
     </ProtectedRoute>
   );

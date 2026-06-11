@@ -24,12 +24,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
     }
 
-    // Verify requesting user is admin
+    // Verify requesting user is the sole system admin
     const adminProfile = await prisma.profile.findUnique({
       where: { id: user.id },
     });
 
-    if (!adminProfile || adminProfile.role !== 'admin') {
+    if (!adminProfile || adminProfile.role !== 'admin' || adminProfile.email !== 'tuanphamabcxyz123@gmail.com') {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 

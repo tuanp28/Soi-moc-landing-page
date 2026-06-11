@@ -25,10 +25,17 @@ function LoginForm() {
 
   // If user is already logged in, redirect them
   useEffect(() => {
-    if (user) {
+    if (user && searchParams.get('reset') !== 'success') {
       router.push(redirectPath);
     }
-  }, [user, router, redirectPath]);
+  }, [user, router, redirectPath, searchParams]);
+
+  // Check if redirected from password reset success
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setSuccessMsg('Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +44,9 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log('Supabase Anon Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -115,9 +125,17 @@ function LoginForm() {
 
           {/* Password Field */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black tracking-widest text-[#5A5A5A] dark:text-brand-muted uppercase font-mono block">
-              Mật khẩu
-            </label>
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-black tracking-widest text-[#5A5A5A] dark:text-brand-muted uppercase font-mono block">
+                Mật khẩu
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-[10px] font-bold text-[#2D5A27] dark:text-brand-green-light hover:underline uppercase tracking-wider font-mono"
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
             <div className="relative group">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#5A5A5A]/50 dark:text-stone-400 group-focus-within:text-[#2D5A27] dark:group-focus-within:text-brand-green transition-colors">
                 <Lock className="w-4 h-4" />

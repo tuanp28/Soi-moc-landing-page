@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       where: { id: user.id },
     });
 
-    // Auto-create profile on first OAuth login
+    // Auto-create profile on first registration/login
     if (!profile) {
       profile = await prisma.profile.create({
         data: {
@@ -40,8 +40,53 @@ export async function GET(request: Request) {
           avatarUrl: user.user_metadata?.avatar_url || null,
           role: 'customer',
           vipLevel: 'normal',
+          claimedGifts: '',
         },
       });
+    }
+
+    // Auto-upgrade VIP Level based on total spending of COMPLETED orders
+    try {
+      const completedOrders = await prisma.order.findMany({
+        where: {
+          userId: user.id,
+          orderStatus: 'completed',
+        },
+      });
+
+      const totalSpent = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+
+      const vipWeights: Record<string, number> = {
+        normal: 0,
+        silver: 1,
+        gold: 2,
+        diamond: 3,
+      };
+
+      let targetVipLevel = 'normal';
+      if (totalSpent >= 5000000) {
+        targetVipLevel = 'diamond';
+      } else if (totalSpent >= 2000000) {
+        targetVipLevel = 'gold';
+      } else if (totalSpent >= 500000) {
+        targetVipLevel = 'silver';
+      }
+
+      if (profile) {
+        const currentWeight = vipWeights[profile.vipLevel] || 0;
+        const targetWeight = vipWeights[targetVipLevel] || 0;
+
+        if (targetWeight > currentWeight) {
+          profile = await prisma.profile.update({
+            where: { id: user.id },
+            data: {
+              vipLevel: targetVipLevel as any,
+            },
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error auto-upgrading VIP level:', err);
     }
 
     // Set secure cookies for routing middleware

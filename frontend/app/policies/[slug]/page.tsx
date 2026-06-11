@@ -26,6 +26,7 @@ export default function PolicyDetailPage({ params }: PolicyPageProps) {
     { name: 'Chính sách bảo mật thông tin', path: '/policies/bao-mat', type: 'policy', slug: 'bao-mat' },
     { name: 'Chính sách phương thức thanh toán', path: '/policies/thanh-toan', type: 'policy', slug: 'thanh-toan' },
     { name: 'Chính sách vận chuyển & Giao nhận', path: '/policies/van-chuyen', type: 'policy', slug: 'van-chuyen' },
+    { name: 'Chính sách thành viên & Ưu đãi', path: '/policies/thanh-vien', type: 'policy', slug: 'thanh-vien' },
   ];
 
   return (

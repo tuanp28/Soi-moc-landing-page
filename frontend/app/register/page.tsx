@@ -37,6 +37,21 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password.length < 8) {
+      setErrorMsg('Mật khẩu phải có tối thiểu 8 ký tự.');
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      setErrorMsg('Mật khẩu quá dễ đoán. Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -174,6 +189,9 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-[9px] text-[#8C8C8C] dark:text-stone-550 font-mono leading-normal">
+                Mật khẩu tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.
+              </p>
             </div>
 
             {/* Confirm Password Field */}

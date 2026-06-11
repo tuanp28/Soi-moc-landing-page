@@ -10,7 +10,9 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     // Supabase client automatically handles hash/query parameter parsing for token recovery
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        router.push('/reset-password');
+      } else if (event === 'SIGNED_IN' && session) {
         router.push('/profile');
       }
     });

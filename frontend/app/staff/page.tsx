@@ -87,7 +87,7 @@ const mockOrders: Order[] = [
 
 function StaffDashboard() {
   const router = useRouter();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, session, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,24 +97,28 @@ function StaffDashboard() {
   const [isUsingMock, setIsUsingMock] = useState(false);
 
   const fetchOrders = async () => {
+    if (!session) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        setOrders(data);
-        setIsUsingMock(false);
+      const response = await fetch('/api/orders', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (response.ok) {
+        const resData = await response.json();
+        if (resData.orders && resData.orders.length > 0) {
+          setOrders(resData.orders);
+          setIsUsingMock(false);
+        } else {
+          setOrders(mockOrders);
+          setIsUsingMock(true);
+        }
       } else {
-        setOrders(mockOrders);
-        setIsUsingMock(true);
+        throw new Error('Failed to fetch from API');
       }
     } catch (err) {
-      console.warn('Supabase orders query failed, displaying mock admin data:', err);
+      console.warn('Backend orders query failed, displaying mock admin data:', err);
       setOrders(mockOrders);
       setIsUsingMock(true);
     } finally {
@@ -123,19 +127,34 @@ function StaffDashboard() {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (session) {
+      fetchOrders();
+    }
+  }, [session]);
 
   const handleUpdateStatus = async (orderId: string, field: 'order_status' | 'payment_status', newStatus: string) => {
+    if (!session) return;
     setActionLoadingId(orderId);
     try {
-      if (orderId.length > 15) {
-        const { error } = await supabase
-          .from('orders')
-          .update({ [field]: newStatus })
-          .eq('id', orderId);
+      // If it's a database order (real order SM-XXXXXX starts with SM- and length > 8)
+      if (orderId.startsWith('SM-') && orderId.length > 8) {
+        const response = await fetch('/api/orders', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            orderId,
+            field,
+            status: newStatus
+          })
+        });
 
-        if (error) throw error;
+        const resData = await response.json();
+        if (!response.ok || !resData.success) {
+          throw new Error(resData.error || 'Failed to update order status');
+        }
       }
 
       setOrders(prev => 
@@ -157,7 +176,7 @@ function StaffDashboard() {
     }
   };
 
-  const totalOrders = orders.length;
+  const totalOrders = orders.filter(o => o.order_status !== 'cancelled').length;
   const newOrders = orders.filter(o => o.order_status === 'waiting_confirm').length;
   const shippingOrders = orders.filter(o => o.order_status === 'shipping').length;
   const totalRevenue = orders
@@ -256,7 +275,7 @@ function StaffDashboard() {
               <h3 className="text-xl md:text-2xl font-black text-[#1A1A1A] dark:text-white">
                 {totalOrders} Đơn
               </h3>
-              <p className="text-[8px] text-brand-muted">Lưu trong hệ thống</p>
+              <p className="text-[8px] text-brand-muted">Đơn hàng hoạt động</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/20 text-indigo-800 dark:text-indigo-400 flex items-center justify-center">
               <FileText className="w-6 h-6" />

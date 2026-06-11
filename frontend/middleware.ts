@@ -34,19 +34,6 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    // 4. Protect VIP page (VIP roles or any tier higher than normal)
-    if (isVipPath) {
-      const isVipUser = 
-        role === 'vip' || 
-        role === 'staff' || 
-        role === 'manager' || 
-        role === 'admin' || 
-        vipLevel !== 'normal';
-      
-      if (!isVipUser) {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-    }
   }
 
   return NextResponse.next();

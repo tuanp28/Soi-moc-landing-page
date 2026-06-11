@@ -26,13 +26,14 @@ enum VipLevel {
 }
 
 model Profile {
-  id        String   @id
-  email     String   @unique
-  fullName  String
-  avatarUrl String?
-  role      Role     @default(customer)
-  vipLevel  VipLevel @default(normal)
-  createdAt DateTime @default(now())
+  id           String   @id
+  email        String   @unique
+  fullName     String
+  avatarUrl    String?
+  role         Role     @default(customer)
+  vipLevel     VipLevel @default(normal)
+  claimedGifts String   @default("")
+  createdAt    DateTime @default(now())
 }
 
 model Contact {
@@ -44,4 +45,65 @@ model Contact {
   message   String
   userId    String?
   createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  location  String
+  text      String
+  rating    Int      @default(5)
+  userId    String?
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id              String   @id
+  customerName    String   @map("customer_name")
+  customerPhone   String   @map("customer_phone")
+  customerAddress String   @map("customer_address")
+  customerNote    String?  @map("customer_note")
+  paymentMethod   String   @map("payment_method")
+  paymentStatus   String   @map("payment_status")
+  orderStatus     String   @map("order_status")
+  totalAmount     Float    @map("total_amount")
+  userId          String?  @map("user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model Coupon {
+  id                String        @id @default(cuid())
+  code              String        @unique
+  discountType      String        @map("discount_type") // "percentage" | "fixed"
+  discountValue     Float         @map("discount_value")
+  minOrderValue     Float         @default(0) @map("min_order_value")
+  maxDiscountAmount Float?        @map("max_discount_amount")
+  usageLimit        Int?          @map("usage_limit")
+  usedCount         Int           @default(0) @map("used_count")
+  limitPerUser      Int?          @map("limit_per_user")
+  startDate         DateTime      @map("start_date")
+  expiryDate        DateTime      @map("expiry_date")
+  isActive          Boolean       @default(true) @map("is_active")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  usages            CouponUsage[]
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id        String   @id @default(cuid())
+  couponId  String   @map("coupon_id")
+  userId    String   @map("user_id")
+  orderId   String?  @map("order_id")
+  usedAt    DateTime @default(now()) @map("used_at")
+
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, userId], name: "unique_user_coupon_usage")
+  @@index([orderId])
+  @@index([userId])
+  @@map("coupon_usages")
 }

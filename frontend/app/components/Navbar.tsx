@@ -11,6 +11,7 @@ import { supabase } from '@/src/lib/supabase';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { user, profile, signOut } = useAuth();
@@ -49,6 +50,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: 'TRANG CHỦ', path: '/' },
     { name: 'SẢN PHẨM', path: '/products' },
+    { name: 'VÒNG QUAY', path: '/lucky-wheel' },
     { name: 'GIỚI THIỆU', path: '/about' },
     { name: 'LIÊN HỆ', path: '/contact' },
   ];
@@ -101,66 +103,132 @@ export const Navbar: React.FC = () => {
 
             {/* Auth Link (Conditional Popover/Menu) */}
             {user && profile ? (
-              <div className="flex items-center gap-4 border-l border-brand-green/10 dark:border-white/10 pl-4 py-1">
-                {/* User Info & Badges */}
-                <div className="flex flex-col text-right">
-                  <span className="text-[11px] font-black text-brand-charcoal dark:text-stone-200 uppercase truncate max-w-[120px]">
-                    {profile.fullName}
-                  </span>
-                  
-                  {/* Badges */}
-                  <div className="flex gap-1 justify-end mt-0.5 select-none">
-                    {/* Role Badge */}
-                    {profile.role !== 'customer' && (
-                      <span className="px-1.5 py-0.5 text-[8px] font-bold bg-brand-green/10 text-brand-green border border-brand-green/20 uppercase tracking-widest rounded-none font-mono">
-                        {profile.role}
-                      </span>
-                    )}
-                    {/* VIP Level Badge */}
-                    <span className={`px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded-none font-mono border ${
-                      profile.vipLevel === 'diamond' ? 'bg-cyan-50 dark:bg-cyan-950/20 text-cyan-700 dark:text-cyan-400 border-cyan-200' :
-                      profile.vipLevel === 'gold' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200' :
-                      profile.vipLevel === 'silver' ? 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-300' :
-                      'bg-emerald-50 dark:bg-emerald-950/10 text-emerald-800 dark:text-emerald-400 border-emerald-250'
-                    }`}>
-                      {profile.vipLevel}
+              <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1">
+                {/* Click-outside backdrop overlay */}
+                {isDropdownOpen && (
+                  <div
+                    className="fixed inset-0 z-30 cursor-default bg-transparent"
+                    onClick={() => setIsDropdownOpen(false)}
+                  />
+                )}
+
+                {/* User Trigger Button */}
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2.5 hover:text-brand-green dark:hover:text-brand-green-light transition-colors relative z-40 cursor-pointer text-left"
+                >
+                  <div className="flex flex-col text-right hidden sm:flex">
+                    <span className="text-xs font-bold text-brand-charcoal dark:text-stone-250 leading-tight">
+                      {profile.fullName}
+                    </span>
+                    <span className="text-[8px] text-[#C8953A] font-black uppercase tracking-widest font-mono mt-0.5">
+                      {profile.vipLevel !== 'normal' ? `${profile.vipLevel} member` : 'Standard member'}
                     </span>
                   </div>
-                </div>
 
-                {/* Avatar */}
-                <Link href="/profile" className="relative shrink-0 group">
                   {profile.avatarUrl ? (
                     <img
                       src={profile.avatarUrl}
                       alt={profile.fullName}
-                      className="w-8 h-8 rounded-full border border-brand-green/20 group-hover:border-brand-green transition-all"
+                      className="w-8 h-8 rounded-full border border-brand-green/20 hover:border-brand-green transition-all"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-xs">
+                    <div className="w-8 h-8 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-xs select-none">
                       {profile.fullName.substring(0, 1).toUpperCase()}
                     </div>
                   )}
-                </Link>
+                </button>
 
-                {/* Dashboard Shortcut Badges */}
-                {profile.role === 'admin' && (
-                  <Link href="/admin" className="text-[10px] font-black tracking-widest text-[#C8953A] border border-[#C8953A]/20 px-2 py-1 hover:bg-[#C8953A] hover:text-white transition-all uppercase">
-                    Admin
-                  </Link>
-                )}
-                
-                {(profile.role === 'staff' || profile.role === 'manager' || profile.role === 'admin') && (
-                  <Link href="/staff" className="text-[10px] font-black tracking-widest text-brand-green border border-brand-green/20 px-2 py-1 hover:bg-brand-green hover:text-white transition-all uppercase">
-                    Staff
-                  </Link>
-                )}
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-3.5 w-64 bg-[#FAF6EE] dark:bg-[#171E15] border border-brand-green/10 dark:border-white/10 shadow-2xl z-40 py-3 rounded-none font-sans"
+                    >
+                      {/* Header Info */}
+                      <div className="px-4 py-2 border-b border-brand-green/5 dark:border-white/5 pb-3">
+                        <p className="text-[8px] text-brand-muted dark:text-stone-400 font-mono uppercase tracking-widest font-bold">Tài khoản</p>
+                        <p className="text-xs font-black text-brand-charcoal dark:text-white uppercase truncate mt-0.5 leading-tight">{profile.fullName}</p>
+                        <p className="text-[10px] text-brand-muted dark:text-stone-400 truncate mt-0.5 font-mono">{profile.email || user.email}</p>
+                        
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-1.5 mt-2.5 select-none">
+                          {profile.role !== 'customer' && (
+                            <span className="px-2 py-0.5 text-[8px] font-black bg-brand-green/15 text-brand-green dark:text-brand-green-light border border-brand-green/25 uppercase tracking-widest font-mono">
+                              {profile.role}
+                            </span>
+                          )}
+                          <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest font-mono border ${
+                            profile.vipLevel === 'diamond' ? 'bg-cyan-55/20 text-cyan-700 dark:text-cyan-400 border-cyan-400/30' :
+                            profile.vipLevel === 'gold' ? 'bg-amber-55/20 text-amber-700 dark:text-amber-400 border-amber-400/30' :
+                            profile.vipLevel === 'silver' ? 'bg-stone-500/10 text-stone-600 dark:text-stone-300 border-stone-400/30' :
+                            'bg-emerald-50 dark:bg-emerald-950/10 text-emerald-800 dark:text-emerald-400 border-emerald-250/30'
+                          }`}>
+                            {profile.vipLevel}
+                          </span>
+                        </div>
+                      </div>
 
-                {(profile.role === 'vip' || profile.vipLevel !== 'normal' || profile.role === 'admin' || profile.role === 'staff' || profile.role === 'manager') && (
-                  <Link href="/vip" className="text-[10px] font-black tracking-widest text-cyan-600 border border-cyan-500/20 px-2 py-1 hover:bg-cyan-600 hover:text-white transition-all uppercase font-mono">
-                    VIP
-                  </Link>
-                )}
+                      {/* Menu Options */}
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex items-center px-4 py-2.5 text-xs font-extrabold text-brand-charcoal dark:text-stone-200 hover:bg-brand-green/5 dark:hover:bg-white/5 transition-colors uppercase tracking-wider"
+                        >
+                          👤 Hồ sơ cá nhân
+                        </Link>
+
+                        {profile.role === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center px-4 py-2.5 text-xs font-extrabold text-[#C8953A] hover:bg-[#C8953A]/5 transition-colors uppercase tracking-wider"
+                          >
+                            ⚙️ Dashboard Admin
+                          </Link>
+                        )}
+
+                        {(profile.role === 'staff' || profile.role === 'manager' || profile.role === 'admin') && (
+                          <Link
+                            href="/staff"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center px-4 py-2.5 text-xs font-extrabold text-brand-green dark:text-brand-green-light hover:bg-brand-green/5 dark:hover:bg-white/5 transition-colors uppercase tracking-wider"
+                          >
+                            📋 Dashboard Staff
+                          </Link>
+                        )}
+
+                         {profile && (
+                           <Link
+                             href="/vip"
+                             onClick={() => setIsDropdownOpen(false)}
+                             className="flex items-center px-4 py-2.5 text-xs font-extrabold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/5 transition-colors uppercase tracking-wider"
+                           >
+                             👑 Đặc quyền VIP
+                           </Link>
+                         )}
+                      </div>
+
+                      {/* Sign Out Button */}
+                      <div className="border-t border-brand-green/5 dark:border-white/5 pt-2 mt-1">
+                        <button
+                          onClick={async () => {
+                            setIsDropdownOpen(false);
+                            await signOut();
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-xs font-black text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors uppercase tracking-wider cursor-pointer"
+                        >
+                          🚪 Đăng Xuất
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link
@@ -318,7 +386,7 @@ export const Navbar: React.FC = () => {
                     </Link>
                   )}
 
-                  {(profile.role === 'vip' || profile.vipLevel !== 'normal' || profile.role === 'admin' || profile.role === 'staff' || profile.role === 'manager') && (
+                  {profile && (
                     <Link
                       href="/vip"
                       onClick={() => setIsOpen(false)}

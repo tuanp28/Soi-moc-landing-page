@@ -14,6 +14,7 @@ export const Footer: React.FC = () => {
     { name: 'Chính sách bảo mật thông tin', path: '/policies/bao-mat' },
     { name: 'Chính sách phương thức thanh toán', path: '/policies/thanh-toan' },
     { name: 'Chính sách vận chuyển & Giao nhận', path: '/policies/van-chuyen' },
+    { name: 'Chính sách thành viên & Ưu đãi', path: '/policies/thanh-vien' },
   ];
 
   return (

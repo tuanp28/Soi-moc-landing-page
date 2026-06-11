@@ -204,5 +204,71 @@ export const policies: Record<string, Policy> = {
         content: 'Khi nhận hàng, khách hàng có quyền mở gói hàng ra kiểm tra số lượng bọc bún/phở ngô khô xem có đúng số lượng đặt hay bao bì có bị rách hỏng gì không trước khi ký nhận với shipper.'
       }
     ]
+  },
+  'thanh-vien': {
+    slug: 'thanh-vien',
+    title: 'Chính Sách Thành Viên & Đặc Quyền VIP',
+    description: 'Quy chế thăng hạng, ưu đãi chiết khấu trực tiếp và hành trình tri ân thành viên thân thiết tại Sợi Mộc.',
+    lastUpdated: 'Tháng 6, 2026',
+    sections: [
+      {
+        title: '1. Quy Chế Thăng Cấp Bậc VIP',
+        content: 'Hệ thống thành viên Sợi Mộc Club tự động tính điểm tích lũy dựa trên tổng giá trị các đơn hàng giao thành công (ở trạng thái Đã hoàn thành) của tài khoản:',
+        items: [
+          {
+            subtitle: 'Hạng Bạc (Silver)',
+            text: 'Tự động nâng hạng khi tổng chi tiêu tích lũy đạt từ 500.000đ trở lên.'
+          },
+          {
+            subtitle: 'Hạng Vàng (Gold)',
+            text: 'Tự động nâng hạng khi tổng chi tiêu tích lũy đạt từ 2.000.000đ trở lên.'
+          },
+          {
+            subtitle: 'Hạng Kim Cương (Diamond)',
+            text: 'Tự động nâng hạng khi tổng chi tiêu tích lũy đạt từ 5.000.000đ trở lên.'
+          }
+        ]
+      },
+      {
+        title: '2. Đặc Quyền Chiết Khấu Trực Tiếp',
+        content: 'Thành viên VIP sẽ được hưởng mức giảm giá trực tiếp vào đơn hàng tại giỏ hàng mà không cần nhập mã giảm giá:',
+        items: [
+          {
+            subtitle: 'Hạng Bạc (Silver)',
+            text: 'Giảm trực tiếp 5% giá trị toàn bộ sản phẩm bún, phở ngô khi mua sắm.'
+          },
+          {
+            subtitle: 'Hạng Vàng (Gold)',
+            text: 'Giảm trực tiếp 10% giá trị toàn bộ sản phẩm bún, phở ngô khi mua sắm.'
+          },
+          {
+            subtitle: 'Hạng Kim Cương (Diamond)',
+            text: 'Giảm trực tiếp 15% giá trị toàn bộ sản phẩm bún, phở ngô khi mua sắm.'
+          }
+        ]
+      },
+      {
+        title: '3. Hành Trình Quà Tặng Tri Ân',
+        content: 'Tính từ thời điểm đăng ký tài khoản, khách hàng sẽ nhận được các voucher và phần quà tri ân đặc biệt tại các mốc thời gian đồng hành:',
+        items: [
+          {
+            subtitle: 'Mốc 1 Tháng (30 ngày)',
+            text: 'Nhận ngay Voucher giảm giá 20.000đ trực tiếp vào đơn hàng kế tiếp.'
+          },
+          {
+            subtitle: 'Mốc 6 Tháng (180 ngày)',
+            text: 'Nhận ngay Voucher giảm giá 50.000đ trực tiếp vào đơn hàng kế tiếp.'
+          },
+          {
+            subtitle: 'Mốc 1 Năm (365 ngày)',
+            text: 'Nhận Hộp quà tri ân đặc biệt được thiết kế theo cấp bậc VIP của chủ tài khoản: Standard Edition (Voucher 100k), Silver Edition (Hộp quà + Voucher 100k), Gold Edition (Hộp quà đặc biệt + Voucher 200k), Diamond Edition (Hộp quà cao cấp + Voucher 300k).'
+          }
+        ]
+      },
+      {
+        title: '4. Điều Khoản Áp Dụng',
+        content: 'Hệ thống tự động đồng bộ và hiển thị tiến trình thăng cấp trực tiếp tại trang Hồ Sơ của bạn. Mọi hành vi tạo đơn ảo hoặc gian lận hủy đơn sẽ bị hệ thống tự động loại trừ khỏi doanh số tích lũy.'
+      }
+    ]
   }
 };

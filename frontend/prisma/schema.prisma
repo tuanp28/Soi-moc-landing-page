@@ -68,6 +68,7 @@ model Order {
   orderStatus     String   @map("order_status")
   totalAmount     Float    @map("total_amount")
   userId          String?  @map("user_id")
+  itemsJson       String   @default("[]") @map("items_json")
   createdAt       DateTime @default(now()) @map("created_at")
 
   @@index([userId])

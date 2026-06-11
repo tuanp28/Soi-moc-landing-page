@@ -70,18 +70,27 @@ export async function GET(request: Request) {
     }
 
     // Convert keys to camelCase or map to match what the frontend expects
-    const formattedOrders = orders.map((o) => ({
-      id: o.id,
-      customer_name: o.customerName,
-      customer_phone: o.customerPhone,
-      customer_address: o.customerAddress,
-      customer_note: o.customerNote,
-      payment_method: o.paymentMethod,
-      payment_status: o.paymentStatus,
-      order_status: o.orderStatus,
-      total_amount: o.totalAmount,
-      created_at: o.createdAt.toISOString(),
-    }));
+    const formattedOrders = orders.map((o) => {
+      let parsedItems = [];
+      try {
+        parsedItems = JSON.parse(o.itemsJson);
+      } catch (e) {
+        console.error('Failed to parse itemsJson for order:', o.id, e);
+      }
+      return {
+        id: o.id,
+        customer_name: o.customerName,
+        customer_phone: o.customerPhone,
+        customer_address: o.customerAddress,
+        customer_note: o.customerNote,
+        payment_method: o.paymentMethod,
+        payment_status: o.paymentStatus,
+        order_status: o.orderStatus,
+        total_amount: o.totalAmount,
+        items: parsedItems,
+        created_at: o.createdAt.toISOString(),
+      };
+    });
 
     return NextResponse.json({ success: true, orders: formattedOrders });
   } catch (error) {
@@ -122,6 +131,7 @@ export async function POST(request: Request) {
 
     // Recalculate original total on the server to prevent F12 price tampering
     let computedTotal = 0;
+    const resolvedItems: any[] = [];
     for (const item of cartItems) {
       const prod = products.find((p) => p.id === item.productId);
       if (!prod) {
@@ -132,6 +142,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: `Kích cỡ ${item.selectedWeight} không hợp lệ.` }, { status: 400 });
       }
       computedTotal += sizeInfo.price * item.quantity;
+      resolvedItems.push({
+        productId: item.productId,
+        name: prod.name,
+        selectedWeight: item.selectedWeight,
+        quantity: item.quantity,
+        price: sizeInfo.price,
+      });
     }
 
     // Validate and apply coupon atomically to prevent concurrency race conditions
@@ -246,6 +263,7 @@ export async function POST(request: Request) {
           orderStatus: 'waiting_confirm',
           totalAmount: finalAmount,
           userId: user ? user.id : null,
+          itemsJson: JSON.stringify(resolvedItems),
         },
       });
 

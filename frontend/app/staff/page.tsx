@@ -21,6 +21,14 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ProtectedRoute from '@/app/components/ProtectedRoute';
 
+interface OrderItem {
+  productId: string;
+  name: string;
+  selectedWeight: string;
+  quantity: number;
+  price: number;
+}
+
 interface Order {
   id: string;
   customer_name: string;
@@ -31,6 +39,7 @@ interface Order {
   payment_status: string;
   order_status: string;
   total_amount: number;
+  items?: OrderItem[];
   created_at: string;
 }
 
@@ -521,6 +530,35 @@ function StaffDashboard() {
                             <p className="font-medium mt-0.5 italic">{selectedOrder.customer_note}</p>
                           </div>
                         </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Product List */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black tracking-widest text-[#2D5A27] dark:text-brand-green-light uppercase font-mono border-b border-[#2D5A27]/5 dark:border-white/5 pb-1">
+                      Danh Sách Sản Phẩm
+                    </h4>
+                    <div className="divide-y divide-stone-200/50 dark:divide-white/5 text-xs">
+                      {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                        selectedOrder.items.map((item, idx) => (
+                          <div key={idx} className="py-2.5 flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <p className="font-extrabold">{item.name}</p>
+                              <p className="text-[10px] text-brand-muted font-mono uppercase tracking-wider">
+                                Phân loại: {item.selectedWeight} | Đơn giá: {item.price.toLocaleString('vi-VN')}đ
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="font-mono font-bold text-brand-charcoal dark:text-stone-300">x{item.quantity}</p>
+                              <p className="font-extrabold text-[#2D5A27] dark:text-brand-green-light mt-0.5">
+                                {(item.price * item.quantity).toLocaleString('vi-VN')}đ
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-brand-muted italic py-2">Không có thông tin chi tiết sản phẩm.</p>
                       )}
                     </div>
                   </div>

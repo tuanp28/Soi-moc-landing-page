@@ -5,6 +5,75 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { X, ShoppingBag, Trash2, ArrowRight, CheckCircle, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/src/lib/supabase';
+
+const VIETNAM_PROVINCES = [
+  "Hà Nội",
+  "Thạch Thất (Hà Nội)",
+  "Quốc Oai (Hà Nội)",
+  "TP Hồ Chí Minh",
+  "Đà Nẵng",
+  "An Giang",
+  "Bà Rịa - Vũng Tàu",
+  "Bắc Giang",
+  "Bắc Kạn",
+  "Bạc Liêu",
+  "Bắc Ninh",
+  "Bến Tre",
+  "Bình Định",
+  "Bình Dương",
+  "Bình Phước",
+  "Bình Thuận",
+  "Cà Mau",
+  "Cần Thơ",
+  "Cao Bằng",
+  "Đắk Lắk",
+  "Đắk Nông",
+  "Điện Biên",
+  "Đồng Nai",
+  "Đồng Tháp",
+  "Gia Lai",
+  "Hà Giang",
+  "Hà Nam",
+  "Hà Tĩnh",
+  "Hải Dương",
+  "Hải Phòng",
+  "Hậu Giang",
+  "Hòa Bình",
+  "Hưng Yên",
+  "Khánh Hòa",
+  "Kiên Giang",
+  "Kon Tum",
+  "Lai Châu",
+  "Lâm Đồng",
+  "Lạng Sơn",
+  "Lào Cai",
+  "Long An",
+  "Nam Định",
+  "Nghệ An",
+  "Ninh Bình",
+  "Ninh Thuận",
+  "Phú Thọ",
+  "Phú Yên",
+  "Quảng Bình",
+  "Quảng Nam",
+  "Quảng Ngãi",
+  "Quảng Ninh",
+  "Quảng Trị",
+  "Sóc Trăng",
+  "Sơn La",
+  "Tây Ninh",
+  "Thái Bình",
+  "Thái Nguyên",
+  "Thanh Hóa",
+  "Thừa Thiên Huế",
+  "Tiền Giang",
+  "Trà Vinh",
+  "Tuyên Quang",
+  "Vĩnh Long",
+  "Vĩnh Phúc",
+  "Yên Bái"
+];
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -31,6 +100,68 @@ export const CartDrawer: React.FC = () => {
   const [compiledOrderText, setCompiledOrderText] = useState('');
   const [completedOrderTotal, setCompletedOrderTotal] = useState(0);
 
+  // Shipping rates & province state variables
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [shippingRates, setShippingRates] = useState<any[]>([]);
+  const [shippingFee, setShippingFee] = useState(40000); // Default to 40k
+  const [estimatedDays, setEstimatedDays] = useState('3-5 ngày');
+
+  // Fetch shipping rates from Supabase on mount
+  useEffect(() => {
+    const fetchShippingRates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('shipping_rates')
+          .select('*');
+        if (error) throw error;
+        if (data) {
+          setShippingRates(data);
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy phí vận chuyển:', err);
+        // Fallback static rates in case of query fails
+        setShippingRates([
+          { province_name: 'Hà Nội', shipping_fee: 20000, estimated_days: '1-2 ngày' },
+          { province_name: 'Thạch Thất', shipping_fee: 0, estimated_days: 'Trong ngày' },
+          { province_name: 'Quốc Oai', shipping_fee: 0, estimated_days: 'Trong ngày' },
+          { province_name: 'TP Hồ Chí Minh', shipping_fee: 35000, estimated_days: '3-4 ngày' },
+          { province_name: 'Đà Nẵng', shipping_fee: 35000, estimated_days: '3-4 ngày' },
+          { province_name: 'Các tỉnh khác', shipping_fee: 40000, estimated_days: '3-5 ngày' }
+        ]);
+      }
+    };
+    fetchShippingRates();
+  }, []);
+
+  const handleProvinceChange = (province: string) => {
+    setSelectedProvince(province);
+    if (!province) {
+      setShippingFee(40000);
+      setEstimatedDays('3-5 ngày');
+      return;
+    }
+    
+    // Normalize to check rates
+    let searchName = province;
+    if (province.includes('Thạch Thất')) {
+      searchName = 'Thạch Thất';
+    } else if (province.includes('Quốc Oai')) {
+      searchName = 'Quốc Oai';
+    } else if (province.includes('Hà Nội')) {
+      searchName = 'Hà Nội';
+    } else if (province.includes('TP Hồ Chí Minh')) {
+      searchName = 'TP Hồ Chí Minh';
+    } else if (province.includes('Đà Nẵng')) {
+      searchName = 'Đà Nẵng';
+    }
+    
+    const rate = shippingRates.find((r) => r.province_name === searchName) ||
+                 shippingRates.find((r) => r.province_name === 'Các tỉnh khác') ||
+                 { shipping_fee: 40000, estimated_days: '3-5 ngày' };
+    setShippingFee(Number(rate.shipping_fee));
+    setEstimatedDays(rate.estimated_days);
+  };
+
   // Coupon states
   const [couponCodeInput, setCouponCodeInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -38,6 +169,26 @@ export const CartDrawer: React.FC = () => {
   const [couponError, setCouponError] = useState('');
   const [couponSuccess, setCouponSuccess] = useState('');
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  // Calculate total weight of the cart
+  const totalWeight = cart.reduce((total, item) => {
+    const weightStr = item.selectedWeight.toLowerCase();
+    let weightValue = 0;
+    if (weightStr.endsWith('kg')) {
+      weightValue = parseFloat(weightStr.replace('kg', ''));
+    } else if (weightStr.endsWith('g')) {
+      weightValue = parseFloat(weightStr.replace('g', '')) / 1000;
+    }
+    return total + weightValue * item.quantity;
+  }, 0);
+
+  // Check if eligible for free shipping
+  const isFreeShipping = (appliedCoupon && (appliedCoupon.code.toUpperCase().includes('FREESHIP') || appliedCoupon.discountType === 'free_shipping')) ||
+                         cartTotal >= 500000 ||
+                         totalWeight >= 5;
+
+  const finalShippingFee = isFreeShipping ? 0 : shippingFee;
+  const grandTotal = cartTotal - couponDiscount + finalShippingFee;
 
   // Pre-fill name if user is logged in
   useEffect(() => {
@@ -62,6 +213,9 @@ export const CartDrawer: React.FC = () => {
         setCouponDiscount(0);
         setCouponError('');
         setCouponSuccess('');
+        setSelectedProvince('');
+        setShippingFee(40000);
+        setEstimatedDays('3-5 ngày');
       }, 300);
       return () => clearTimeout(timer);
     }
@@ -151,7 +305,10 @@ export const CartDrawer: React.FC = () => {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !address) return;
+    if (!name || !phone || !address || !selectedProvince) {
+      setErrorMsg('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
+      return;
+    }
 
     const cleanPhone = phone.replace(/[\s().-]/g, '');
     if (!/^(0|84|\+84)[35789][0-9]{8}$|^(0|84|\+84)2[0-9]{9}$/.test(cleanPhone)) {
@@ -178,13 +335,14 @@ export const CartDrawer: React.FC = () => {
           customerPhone: phone,
           customerAddress: address,
           customerNote: note || null,
-          totalAmount: cartTotal,
+          totalAmount: grandTotal,
           cartItems: cart.map(item => ({
             productId: item.product.id,
             selectedWeight: item.selectedWeight,
             quantity: item.quantity,
           })),
           couponCode: appliedCoupon ? appliedCoupon.code : null,
+          province: selectedProvince,
         }),
       });
 
@@ -211,14 +369,15 @@ export const CartDrawer: React.FC = () => {
 MÃ ĐƠN HÀNG: ${orderId}
 👤 Khách hàng: ${name}
 📞 Số điện thoại: ${phone}
-📍 Địa chỉ giao hàng: ${address}
+📍 Địa chỉ giao hàng: ${address}${selectedProvince ? `, ${selectedProvince}` : ''}
 💬 Ghi chú: ${note || 'Không có'}
 -----------------------------
 🛒 Danh sách sản phẩm:
 ${itemsText}
 -----------------------------
-${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDiscount.toLocaleString('vi-VN')}đ)\n-----------------------------\n` : ''}💰 Tổng đơn hàng: ${(cartTotal - couponDiscount).toLocaleString('vi-VN')}đ
-(Chưa bao gồm phí vận chuyển - Đồng giá ship toàn quốc 30.000đ, miễn ship từ 5kg hoặc đơn hàng trên 500k)`;
+${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDiscount.toLocaleString('vi-VN')}đ)\n-----------------------------\n` : ''}🚚 Phí vận chuyển: ${finalShippingFee === 0 ? 'Miễn phí' : `${finalShippingFee.toLocaleString('vi-VN')}đ`} (${estimatedDays})
+-----------------------------
+💰 Tổng thanh toán: ${grandTotal.toLocaleString('vi-VN')}đ`;
 
       // Copy to clipboard
       navigator.clipboard.writeText(orderText).then(() => {
@@ -227,7 +386,7 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
       });
 
       setCompiledOrderText(orderText);
-      setCompletedOrderTotal(cartTotal - couponDiscount);
+      setCompletedOrderTotal(grandTotal);
       clearCart();
       setCheckoutStep('success');
     } catch (err: any) {
@@ -421,14 +580,35 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
 
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
-                          Địa Chỉ Nhận Hàng *
+                          Tỉnh / Thành Phố *
+                        </label>
+                        <div className="relative">
+                          <select
+                            required
+                            value={selectedProvince}
+                            onChange={(e) => handleProvinceChange(e.target.value)}
+                            className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10"
+                          >
+                            <option value="">-- Chọn Tỉnh / Thành Phố --</option>
+                            {VIETNAM_PROVINCES.map((prov) => (
+                              <option key={prov} value={prov} className="bg-zinc-900 text-white">
+                                {prov}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                          Địa Chỉ Chi Tiết *
                         </label>
                         <textarea
                           required
                           rows={3}
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Số nhà, ngõ/ngách, xã/phường, quận/huyện, tỉnh/thành"
+                          placeholder="Số nhà, ngõ/ngách, xã/phường, quận/huyện"
                           className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none resize-none"
                         />
                       </div>
@@ -568,17 +748,57 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                   <span className="text-zinc-200 font-medium">{formatPrice(cartTotal)}</span>
                 </div>
                 {appliedCoupon && (
-                  <div className="flex justify-between items-center mb-3 text-xs text-emerald-450 font-bold">
+                  <div className="flex justify-between items-center mb-1.5 text-xs text-emerald-450 font-bold">
                     <span>Mã giảm giá ({appliedCoupon.code})</span>
                     <span>-{formatPrice(couponDiscount)}</span>
                   </div>
                 )}
+                <div className="flex justify-between items-center mb-1.5 text-xs">
+                  <span className="text-zinc-400">Phí vận chuyển {selectedProvince && `(${estimatedDays})`}</span>
+                  <div className="relative inline-block pb-0.5">
+                    <span className="text-zinc-200 font-medium">
+                      {checkoutStep === 'cart' ? (
+                        'Tính ở bước tiếp theo'
+                      ) : !selectedProvince ? (
+                        'Chọn tỉnh/thành'
+                      ) : finalShippingFee === 0 ? (
+                        <span className="text-emerald-450 font-bold">Miễn phí</span>
+                      ) : (
+                        formatPrice(finalShippingFee)
+                      )}
+                    </span>
+                    {checkoutStep === 'form' && selectedProvince && (
+                      <motion.div
+                        key={`ship-${finalShippingFee}`}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                        style={{ originX: 0 }}
+                        className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#2B4C28]"
+                      />
+                    )}
+                  </div>
+                </div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-zinc-400 font-medium tracking-wide text-sm">Tổng cộng</span>
-                  <span className="text-xl font-bold text-white font-sans">{formatPrice(cartTotal - couponDiscount)}</span>
+                  <div className="relative inline-block pb-1">
+                    <span className="text-xl font-bold text-white font-sans">
+                      {formatPrice(checkoutStep === 'cart' ? cartTotal - couponDiscount : grandTotal)}
+                    </span>
+                    {checkoutStep === 'form' && selectedProvince && (
+                      <motion.div
+                        key={`total-${grandTotal}`}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                        style={{ originX: 0 }}
+                        className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#2B4C28]"
+                      />
+                    )}
+                  </div>
                 </div>
                 <p className="text-zinc-500 text-xs mb-5 leading-normal">
-                  Phí vận chuyển sẽ được tính khi xác nhận đơn hàng (Đồng giá 30k toàn quốc, miễn phí cho đơn hàng từ 5kg).
+                  Sợi Mộc giao hàng toàn quốc. Miễn phí vận chuyển cho đơn hàng từ 500k hoặc từ 5kg.
                 </p>
 
                 {checkoutStep === 'cart' ? (

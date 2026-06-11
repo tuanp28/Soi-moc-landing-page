@@ -42,6 +42,7 @@ const orderPOSTBodySchema = z.object({
   totalAmount: z.number(),
   cartItems: z.array(cartItemSchema).min(1, 'Giỏ hàng của bạn đang trống.'),
   couponCode: z.string().nullable().optional(),
+  province: z.string().nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -99,6 +100,52 @@ export async function GET(request: Request) {
   }
 }
 
+async function getShippingFeeForProvince(provinceName: string | null | undefined): Promise<{ shippingFee: number; estimatedDays: string }> {
+  if (!provinceName) {
+    return { shippingFee: 40000, estimatedDays: '3-5 ngày' };
+  }
+  
+  let searchName = provinceName;
+  if (provinceName.includes('Thạch Thất')) {
+    searchName = 'Thạch Thất';
+  } else if (provinceName.includes('Quốc Oai')) {
+    searchName = 'Quốc Oai';
+  } else if (provinceName.includes('Hà Nội')) {
+    searchName = 'Hà Nội';
+  } else if (provinceName.includes('TP Hồ Chí Minh')) {
+    searchName = 'TP Hồ Chí Minh';
+  } else if (provinceName.includes('Đà Nẵng')) {
+    searchName = 'Đà Nẵng';
+  }
+
+  try {
+    const rate = await prisma.shippingRate.findUnique({
+      where: { provinceName: searchName }
+    });
+    if (rate) {
+      return { shippingFee: rate.shippingFee, estimatedDays: rate.estimatedDays };
+    }
+    const fallbackRate = await prisma.shippingRate.findUnique({
+      where: { provinceName: 'Các tỉnh khác' }
+    });
+    if (fallbackRate) {
+      return { shippingFee: fallbackRate.shippingFee, estimatedDays: fallbackRate.estimatedDays };
+    }
+  } catch (err) {
+    console.error('Error fetching shipping rate:', err);
+  }
+  if (searchName === 'Thạch Thất' || searchName === 'Quốc Oai') {
+    return { shippingFee: 0, estimatedDays: 'Trong ngày' };
+  }
+  if (searchName === 'Hà Nội') {
+    return { shippingFee: 20000, estimatedDays: '1-2 ngày' };
+  }
+  if (searchName === 'TP Hồ Chí Minh' || searchName === 'Đà Nẵng') {
+    return { shippingFee: 35000, estimatedDays: '3-4 ngày' };
+  }
+  return { shippingFee: 40000, estimatedDays: '3-5 ngày' };
+}
+
 export async function POST(request: Request) {
   const forwardedFor = request.headers.get('x-forwarded-for');
   const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
@@ -121,7 +168,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const { customerName, customerPhone, customerAddress, customerNote, cartItems, couponCode } = parsed.data;
+    const { customerName, customerPhone, customerAddress, customerNote, cartItems, couponCode, province } = parsed.data;
     couponCodeSent = couponCode || null;
 
     const cleanPhone = customerPhone.replace(/[\s().-]/g, '');
@@ -131,6 +178,7 @@ export async function POST(request: Request) {
 
     // Recalculate original total on the server to prevent F12 price tampering
     let computedTotal = 0;
+    let totalWeight = 0;
     const resolvedItems: any[] = [];
     for (const item of cartItems) {
       const prod = products.find((p) => p.id === item.productId);
@@ -149,6 +197,16 @@ export async function POST(request: Request) {
         quantity: item.quantity,
         price: sizeInfo.price,
       });
+
+      // Parse weight for shipping calculation
+      const weightStr = item.selectedWeight.toLowerCase();
+      let weightValue = 0;
+      if (weightStr.endsWith('kg')) {
+        weightValue = parseFloat(weightStr.replace('kg', ''));
+      } else if (weightStr.endsWith('g')) {
+        weightValue = parseFloat(weightStr.replace('g', '')) / 1000;
+      }
+      totalWeight += weightValue * item.quantity;
     }
 
     // Validate and apply coupon atomically to prevent concurrency race conditions
@@ -229,9 +287,22 @@ export async function POST(request: Request) {
     const randomCode = Math.floor(100000 + Math.random() * 900000);
     const orderId = `SM-${randomCode}`;
 
+    // Get shipping fee based on selected province
+    const { shippingFee: baseShippingFee } = await getShippingFeeForProvince(province);
+
+    // Free shipping criteria:
+    // 1. Coupon applied is a free shipping coupon
+    // 2. Order items subtotal >= 500k
+    // 3. Total weight >= 5kg
+    const isFreeShipping = (appliedCoupon && (appliedCoupon.code.toUpperCase().includes('FREESHIP') || appliedCoupon.discountType === 'free_shipping')) ||
+                           computedTotal >= 500000 ||
+                           totalWeight >= 5;
+
+    const finalShippingFee = isFreeShipping ? 0 : baseShippingFee;
+
     // Process Transaction: Order creation + atomic coupon update + coupon usage log
     const order = await prisma.$transaction(async (tx) => {
-      if (appliedCoupon) {
+      if (appliedCoupon && appliedCoupon.discountType !== 'free_shipping') {
         // Calculate discount
         if (appliedCoupon.discountType === 'percentage') {
           discount = (computedTotal * appliedCoupon.discountValue) / 100;
@@ -248,7 +319,7 @@ export async function POST(request: Request) {
       }
 
       // Guarantee invoice amount is never negative
-      const finalAmount = Math.max(0, computedTotal - discount);
+      const finalAmount = Math.max(0, computedTotal - discount + finalShippingFee);
 
       // Create order first so that coupon_usages can reference it
       const newOrder = await tx.order.create({
@@ -256,7 +327,7 @@ export async function POST(request: Request) {
           id: orderId,
           customerName: customerName.trim(),
           customerPhone: cleanPhone,
-          customerAddress: customerAddress.trim(),
+          customerAddress: province ? `${customerAddress.trim()}, ${province}` : customerAddress.trim(),
           customerNote: customerNote ? customerNote.trim() : null,
           paymentMethod: 'COD',
           paymentStatus: 'pending',

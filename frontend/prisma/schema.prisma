@@ -108,3 +108,12 @@ model CouponUsage {
   @@index([userId])
   @@map("coupon_usages")
 }
+
+model ShippingRate {
+  id            Int      @id @default(autoincrement())
+  provinceName  String   @unique @map("province_name")
+  shippingFee   Float    @map("shipping_fee")
+  estimatedDays String   @map("estimated_days")
+
+  @@map("shipping_rates")
+}

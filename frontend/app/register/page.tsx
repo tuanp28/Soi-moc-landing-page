@@ -55,6 +55,26 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // Check if email already exists
+      const checkRes = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const checkData = await checkRes.json();
+      if (!checkRes.ok || !checkData.success) {
+        throw new Error(checkData.error || 'Có lỗi xảy ra khi kiểm tra email.');
+      }
+
+      if (checkData.exists) {
+        setErrorMsg('Địa chỉ email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

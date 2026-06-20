@@ -51,8 +51,8 @@ export default function LuckyWheelPage() {
               Điều Kiện & Thể Lệ Chương Trình
             </h3>
             <ul className="list-disc list-outside pl-5 font-sans text-xs md:text-sm text-brand-charcoal/80 space-y-3 leading-relaxed">
-              <li>Mỗi khách hàng (dựa trên địa chỉ IP thiết bị và tài khoản đăng nhập) chỉ được tham gia quay số <strong className="text-brand-gold font-bold">1 lần trong vòng 24 giờ</strong>.</li>
-              <li>Mọi hành vi gian lận, sử dụng bot, công cụ đổi IP tự động sẽ bị hệ thống bảo mật reCAPTCHA phát hiện và tự động khóa quyền tham gia.</li>
+              <li>Mỗi khách hàng (dựa trên thông tin thiết bị và tài khoản đăng nhập) chỉ được tham gia quay số <strong className="text-brand-gold font-bold">1 lần trong vòng 24 giờ</strong>.</li>
+              <li>Mọi hành vi gian lận, sử dụng công cụ tự động hoặc can thiệp hệ thống sẽ bị hệ thống bảo mật phát hiện và tự động khóa quyền tham gia.</li>
               <li>Mã giảm giá nhận được chỉ có giá trị áp dụng khi mua hàng trực tuyến tại trang web chính thức của <strong className="text-brand-green font-bold">Sợi Mộc</strong>.</li>
               <li>Mã ưu đãi không có giá trị quy đổi thành tiền mặt hay chuyển nhượng dưới bất kỳ hình thức nào.</li>
               <li>Vui lòng chụp lại màn hình hoặc sao chép mã ưu đãi ngay khi trúng thưởng để không bỏ lỡ phần quà.</li>

@@ -378,7 +378,7 @@ export default function LuckyWheel() {
       if (err.message === 'reCAPTCHA_bot_detected') {
         setErrorMessage('Phát hiện hành vi bất thường, vui lòng thử lại!');
       } else if (err.message === 'reCAPTCHA_load_failed') {
-        setErrorMessage('Không thể khởi tạo reCAPTCHA. Vui lòng kiểm tra lại kết nối mạng.');
+        setErrorMessage('Không thể khởi tạo hệ thống bảo mật. Vui lòng kiểm tra lại kết nối mạng.');
       } else {
         setErrorMessage('Đã xảy ra lỗi hệ thống. Vui lòng tải lại trang và thử lại.');
       }

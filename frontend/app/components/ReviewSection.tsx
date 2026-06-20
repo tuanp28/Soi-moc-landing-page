@@ -19,6 +19,7 @@ export const ReviewSection: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Form states
   const [rating, setRating] = useState(5);
@@ -47,6 +48,20 @@ export const ReviewSection: React.FC = () => {
   useEffect(() => {
     fetchReviews();
   }, []);
+
+  // Auto-play (auto-slide) every 1 minute (60,000ms)
+  useEffect(() => {
+    if (reviews.length <= 3) return;
+
+    const interval = setInterval(() => {
+      setCurrentPage((prev) => {
+        const totalPages = Math.ceil(reviews.length / 3);
+        return prev >= totalPages ? 1 : prev + 1;
+      });
+    }, 60000); // 1 minute
+
+    return () => clearInterval(interval);
+  }, [reviews.length, currentPage]);
 
   const getInitials = (name: string) => {
     if (!name) return 'SM';
@@ -92,6 +107,7 @@ export const ReviewSection: React.FC = () => {
         setText('');
         setLocation('');
         setRating(5);
+        setCurrentPage(1);
         // Refresh reviews list
         await fetchReviews();
         // Close form after delay
@@ -267,56 +283,87 @@ export const ReviewSection: React.FC = () => {
             <p className="text-xs text-brand-muted font-medium">Chưa có đánh giá nào từ cộng đồng. Hãy là người đầu tiên chia sẻ cảm nhận!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.slice(0, 6).map((review, idx) => (
-              <motion.div
-                key={review.id || idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: (idx % 3) * 0.15 }}
-                className="bg-white border border-brand-green/10 p-8 flex flex-col justify-between relative group hover:border-brand-green/30 transition-all hover:shadow-md"
-              >
-                {/* Quote Icon in background */}
-                <div className="absolute right-6 top-6 text-brand-green-pale pointer-events-none">
-                  <MessageSquare className="w-8 h-8" />
-                </div>
-
-                <div>
-                  {/* Stars */}
-                  <div className="flex gap-1 mb-6">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />
-                    ))}
-                    {[...Array(5 - review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-stone-200" />
-                    ))}
+          <div className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.slice((currentPage - 1) * 3, currentPage * 3).map((review, idx) => (
+                <motion.div
+                  key={review.id || `${currentPage}-${idx}`}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: (idx % 3) * 0.15 }}
+                  className="bg-white border border-brand-green/10 p-8 flex flex-col justify-between relative group hover:border-brand-green/30 transition-all hover:shadow-md"
+                >
+                  {/* Quote Icon in background */}
+                  <div className="absolute right-6 top-6 text-brand-green-pale pointer-events-none">
+                    <MessageSquare className="w-8 h-8" />
                   </div>
 
-                  {/* Comment Text */}
-                  <p className="text-brand-muted text-sm leading-relaxed mb-8 font-medium italic">
-                    "{review.text}"
-                  </p>
-                </div>
-
-                {/* Customer Meta */}
-                <div className="flex items-center gap-4 border-t border-brand-green/5 pt-6">
-                  {/* Avatar Badge */}
-                  <div className="w-10 h-10 bg-[#2D5A27] text-white font-extrabold text-sm flex items-center justify-center font-sans select-none">
-                    {getInitials(review.name)}
-                  </div>
-                  
                   <div>
-                    <h4 className="font-extrabold text-sm text-brand-charcoal tracking-wide uppercase font-sans">
-                      {review.name}
-                    </h4>
-                    <p className="text-[10px] text-brand-muted/60 font-bold uppercase tracking-widest font-mono">
-                      {review.location}
+                    {/* Stars */}
+                    <div className="flex gap-1 mb-6">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />
+                      ))}
+                      {[...Array(5 - review.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-stone-200" />
+                      ))}
+                    </div>
+
+                    {/* Comment Text */}
+                    <p className="text-brand-muted text-sm leading-relaxed mb-8 font-medium italic">
+                      "{review.text}"
                     </p>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Customer Meta */}
+                  <div className="flex items-center gap-4 border-t border-brand-green/5 pt-6">
+                    {/* Avatar Badge */}
+                    <div className="w-10 h-10 bg-[#2D5A27] text-white font-extrabold text-sm flex items-center justify-center font-sans select-none">
+                      {getInitials(review.name)}
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-extrabold text-sm text-brand-charcoal tracking-wide uppercase font-sans">
+                        {review.name}
+                      </h4>
+                      <p className="text-[10px] text-brand-muted/60 font-bold uppercase tracking-widest font-mono">
+                        {review.location}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {reviews.length > 3 && (
+              <div className="flex items-center justify-center gap-4 pt-4 font-mono text-[10px] font-black tracking-widest uppercase">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage((prev) => Math.max(prev - 1, 1));
+                  }}
+                  className="px-5 py-2.5 border border-[#2D5A27] text-[#2D5A27] hover:bg-[#2D5A27] hover:text-white transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#2D5A27] cursor-pointer"
+                >
+                  TRƯỚC
+                </button>
+                
+                <span className="text-[#2D5A27] px-2">
+                  TRANG {currentPage} / {Math.ceil(reviews.length / 3)}
+                </span>
+
+                <button
+                  disabled={currentPage === Math.ceil(reviews.length / 3)}
+                  onClick={() => {
+                    setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(reviews.length / 3)));
+                  }}
+                  className="px-5 py-2.5 border border-[#2D5A27] text-[#2D5A27] hover:bg-[#2D5A27] hover:text-white transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#2D5A27] cursor-pointer"
+                >
+                  SAU
+                </button>
+              </div>
+            )}
           </div>
         )}
 

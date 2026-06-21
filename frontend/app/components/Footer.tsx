@@ -48,6 +48,11 @@ export const Footer: React.FC = () => {
                 Giới thiệu câu chuyện Sợi Mộc
               </Link>
             </li>
+            <li>
+              <Link href="/tra-cuu-don-hang" className="text-stone-300 hover:text-white text-xs transition-colors">
+                Tra cứu đơn hàng của bạn
+              </Link>
+            </li>
             {policyLinks.map((link) => (
               <li key={link.path}>
                 <Link href={link.path} className="text-stone-300 hover:text-white text-xs transition-colors">

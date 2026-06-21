@@ -189,7 +189,7 @@ function StaffDashboard() {
   const newOrders = orders.filter(o => o.order_status === 'waiting_confirm').length;
   const shippingOrders = orders.filter(o => o.order_status === 'shipping').length;
   const totalRevenue = orders
-    .filter(o => o.order_status !== 'cancelled')
+    .filter(o => o.order_status === 'completed' && o.payment_status === 'paid')
     .reduce((sum, o) => sum + Number(o.total_amount), 0);
 
   const filteredOrders = orders.filter(order => {

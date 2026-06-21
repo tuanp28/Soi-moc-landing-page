@@ -53,6 +53,7 @@ export const Navbar: React.FC = () => {
     { name: 'VÒNG QUAY', path: '/lucky-wheel' },
     { name: 'GIỚI THIỆU', path: '/about' },
     { name: 'LIÊN HỆ', path: '/contact' },
+    { name: 'TRA CỨU ĐƠN HÀNG', path: '/tra-cuu-don-hang' },
   ];
 
   return (
@@ -78,32 +79,40 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.path;
-              return (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className={`text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 ${
-                    isActive ? 'text-brand-green' : 'text-brand-muted'
-                  }`}
-                >
-                  {link.name}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+          <div className="hidden md:flex items-center flex-1 justify-center min-w-0 mx-4 lg:mx-6">
+            <div 
+              className="overflow-x-auto scrollbar-none flex items-center gap-4 lg:gap-5 xl:gap-7 py-2 px-1 pr-12 flex-nowrap scroll-smooth select-none max-w-[400px] lg:max-w-[500px] xl:max-w-[600px]"
+              style={{
+                maskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)'
+              }}
+            >
+              {navLinks.map((link) => {
+                const isActive = pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    href={link.path}
+                    className={`text-[10px] lg:text-[11px] xl:text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 whitespace-nowrap flex-shrink-0 ${
+                      isActive ? 'text-brand-green' : 'text-brand-muted'
+                    }`}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNavIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
 
-            {/* Auth Link (Conditional Popover/Menu) */}
+            {/* Profile Dropdown or Login Link (Outside the scrollable area to prevent clipping and keep always visible) */}
             {user && profile ? (
-              <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1">
+              <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1 flex-shrink-0 ml-4">
                 {/* Click-outside backdrop overlay */}
                 {isDropdownOpen && (
                   <div
@@ -231,21 +240,23 @@ export const Navbar: React.FC = () => {
                 </AnimatePresence>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className={`text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 ${
-                  pathname === '/login' ? 'text-brand-green' : 'text-brand-muted'
-                }`}
-              >
-                ĐĂNG NHẬP
-                {pathname === '/login' && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </Link>
+              <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1 flex-shrink-0 ml-4">
+                <Link
+                  href="/login"
+                  className={`text-[10px] lg:text-[11px] xl:text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 whitespace-nowrap ${
+                    pathname === '/login' ? 'text-brand-green' : 'text-brand-muted'
+                  }`}
+                >
+                  ĐĂNG NHẬP
+                  {pathname === '/login' && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              </div>
             )}
           </div>
 

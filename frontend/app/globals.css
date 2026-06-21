@@ -83,6 +83,15 @@ body {
   background: var(--brand-green);
 }
 
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-none {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;

@@ -105,6 +105,7 @@ export default function OrderLookupPage() {
   const translatePaymentStatus = (status: string) => {
     switch (status) {
       case 'pending': return 'Chờ thanh toán';
+      case 'partial_payment': return 'Thanh toán thiếu';
       case 'paid': return 'Đã thanh toán';
       case 'failed': return 'Thất bại';
       default: return status;
@@ -358,7 +359,7 @@ export default function OrderLookupPage() {
                     <div className="space-y-1 text-xs">
                       <p className="font-bold text-stone-400 dark:text-stone-600 text-[8px] uppercase tracking-wider font-mono">Thanh toán</p>
                       <p className="font-black text-brand-green uppercase text-[10px] font-mono">
-                        {order.paymentMethod}
+                        {order.paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản QR' : 'Ship COD'}
                       </p>
                     </div>
                     <div className="space-y-1 text-xs text-right">
@@ -366,6 +367,8 @@ export default function OrderLookupPage() {
                       <span className={`inline-block px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest font-mono ${
                         order.paymentStatus === 'paid'
                           ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-450'
+                          : order.paymentStatus === 'partial_payment'
+                          ? 'bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400'
                           : 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-450'
                       }`}>
                         {translatePaymentStatus(order.paymentStatus)}

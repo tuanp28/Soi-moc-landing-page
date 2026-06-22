@@ -93,7 +93,9 @@ export const CartDrawer: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
-  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'form' | 'success'>('cart');
+  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'form' | 'payment' | 'success'>('cart');
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'BANK_TRANSFER'>('COD');
+  const [createdOrderId, setCreatedOrderId] = useState('');
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -199,7 +201,7 @@ export const CartDrawer: React.FC = () => {
 
   // Reset drawer state on close after animation completes
   useEffect(() => {
-    if (!isCartOpen && checkoutStep === 'success') {
+    if (!isCartOpen && (checkoutStep === 'success' || checkoutStep === 'payment')) {
       const timer = setTimeout(() => {
         setCheckoutStep('cart');
         setName('');
@@ -216,10 +218,51 @@ export const CartDrawer: React.FC = () => {
         setSelectedProvince('');
         setShippingFee(40000);
         setEstimatedDays('3-5 ngày');
+        setPaymentMethod('COD');
+        setCreatedOrderId('');
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [isCartOpen, checkoutStep]);
+
+  // Check if we should skip to the checkout form step directly (Buy Now flow)
+  useEffect(() => {
+    if (isCartOpen) {
+      const skip = localStorage.getItem('skip_to_checkout_form');
+      if (skip === 'true') {
+        setCheckoutStep('form');
+        localStorage.removeItem('skip_to_checkout_form');
+      }
+    }
+  }, [isCartOpen]);
+
+  // Polling for Bank Transfer payment status
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    if (checkoutStep === 'payment' && createdOrderId) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await fetch('/api/orders/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: createdOrderId, phone })
+          });
+          const data = await res.json();
+          if (data.success && data.order.paymentStatus === 'paid') {
+            if (intervalId) clearInterval(intervalId);
+            setCheckoutStep('success');
+          }
+        } catch (err) {
+          console.error('Polling error:', err);
+        }
+      }, 4000);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [checkoutStep, createdOrderId, phone]);
 
   const handleApplyCoupon = async () => {
     if (!couponCodeInput.trim()) return;
@@ -343,6 +386,7 @@ export const CartDrawer: React.FC = () => {
           })),
           couponCode: appliedCoupon ? appliedCoupon.code : null,
           province: selectedProvince,
+          paymentMethod: paymentMethod,
         }),
       });
 
@@ -370,6 +414,7 @@ MÃ ĐƠN HÀNG: ${orderId}
 👤 Khách hàng: ${name}
 📞 Số điện thoại: ${phone}
 📍 Địa chỉ giao hàng: ${address}${selectedProvince ? `, ${selectedProvince}` : ''}
+💳 Thanh toán: ${paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản Ngân hàng (QR)' : 'Thanh toán khi nhận hàng (COD)'}
 💬 Ghi chú: ${note || 'Không có'}
 -----------------------------
 🛒 Danh sách sản phẩm:
@@ -387,8 +432,14 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
 
       setCompiledOrderText(orderText);
       setCompletedOrderTotal(grandTotal);
+      setCreatedOrderId(orderId);
       clearCart();
-      setCheckoutStep('success');
+      
+      if (paymentMethod === 'BANK_TRANSFER') {
+        setCheckoutStep('payment');
+      } else {
+        setCheckoutStep('success');
+      }
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.');
@@ -459,7 +510,7 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-5">
-              {cart.length === 0 && checkoutStep !== 'success' ? (
+              {cart.length === 0 && checkoutStep !== 'success' && checkoutStep !== 'payment' ? (
                 <div className="h-full flex flex-col items-center justify-center text-center text-zinc-500 py-20">
                   <ShoppingBag className="w-16 h-16 mb-4 text-zinc-700" />
                   <p className="text-lg font-medium text-zinc-400 mb-2">Giỏ hàng của bạn đang trống</p>
@@ -546,7 +597,7 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                   )}
 
                   {checkoutStep === 'form' && (
-                    <form onSubmit={handleCheckout} className="space-y-4">
+                    <form id="checkoutForm" onSubmit={handleCheckout} className="space-y-4">
                       <h3 className="font-bold text-md tracking-wider text-amber-500 uppercase border-b border-zinc-800 pb-2">
                         THÔNG TIN ĐẶT HÀNG
                       </h3>
@@ -626,21 +677,106 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                         />
                       </div>
 
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                          Phương thức thanh toán *
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod('COD')}
+                            className={`py-3 px-4 border text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer rounded-none text-center ${
+                              paymentMethod === 'COD'
+                                ? 'border-amber-500 bg-amber-500/10 text-amber-500 font-extrabold'
+                                : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                            }`}
+                          >
+                            💵 Ship COD
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod('BANK_TRANSFER')}
+                            className={`py-3 px-4 border text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer rounded-none text-center ${
+                              paymentMethod === 'BANK_TRANSFER'
+                                ? 'border-amber-500 bg-amber-500/10 text-amber-500 font-extrabold'
+                                : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                            }`}
+                          >
+                            🏦 Chuyển khoản QR
+                          </button>
+                        </div>
+                      </div>
+
                       {errorMsg && (
                         <div className="bg-rose-950/20 border border-rose-800/40 text-rose-300 p-3 text-[11px] font-semibold leading-relaxed">
                           {errorMsg}
                         </div>
                       )}
-
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full mt-4 py-4 bg-amber-500 hover:bg-amber-600 text-black font-extrabold uppercase tracking-widest text-xs transition-colors flex items-center justify-center gap-2 rounded-none disabled:opacity-50 cursor-pointer"
-                      >
-                        {submitting ? 'ĐANG TẠO ĐƠN HÀNG...' : 'ĐẶT HÀNG & COPY ĐƠN HÀNG'}
-                        {!submitting && <ArrowRight className="w-4 h-4" />}
-                      </button>
                     </form>
+                  )}
+
+                  {checkoutStep === 'payment' && (
+                    <div className="h-full flex flex-col items-center justify-center py-6 px-2 text-center">
+                      <h3 className="text-lg font-bold uppercase tracking-wider text-amber-500 mb-2">
+                        QUÉT MÃ QR THANH TOÁN
+                      </h3>
+                      <p className="text-xs text-zinc-400 mb-4">
+                        Đơn hàng: <span className="font-mono text-white font-bold">{createdOrderId}</span>
+                      </p>
+
+                      {/* QR Display */}
+                      <div className="relative w-56 h-56 bg-white border border-zinc-800 rounded-none p-3 mb-4 flex items-center justify-center shadow-lg">
+                        <img
+                          src={`https://qr.sepay.vn/img?bank=TPBank&acc=00000807385&template=compact&amount=${completedOrderTotal}&des=SOIMOC_${createdOrderId}`}
+                          alt="Mã QR Chuyển khoản"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+
+                      {/* Total Amount */}
+                      <div className="w-full bg-zinc-900 border border-zinc-800 py-3 px-4 mb-4 text-center">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold block mb-1">Số tiền cần chuyển</span>
+                        <p className="text-xl font-black text-amber-500">{formatPrice(completedOrderTotal)}</p>
+                      </div>
+
+                      {/* Status Indicator */}
+                      <div className="w-full text-center py-3 px-4 rounded-none text-xs font-semibold mb-6 bg-zinc-900 border border-zinc-850 text-amber-400 flex items-center justify-center gap-2.5">
+                        <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0"></div>
+                        <span>Đang chờ chuyển khoản...</span>
+                      </div>
+
+                      {/* Manual Verification Button */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('/api/orders/lookup', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ orderId: createdOrderId, phone })
+                            });
+                            const data = await res.json();
+                            if (data.success && data.order.paymentStatus === 'paid') {
+                              setCheckoutStep('success');
+                            } else {
+                              alert("Hệ thống chưa nhận được tiền chuyển khoản của bạn. Vui lòng đợi trong giây lát hoặc kiểm tra lại thông tin chuyển khoản.");
+                            }
+                          } catch (err) {
+                            alert("Đã xảy ra lỗi khi kiểm tra giao dịch.");
+                          }
+                        }}
+                        className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-extrabold uppercase tracking-widest text-xs transition-colors rounded-none mb-3 cursor-pointer"
+                      >
+                        Tôi đã chuyển khoản
+                      </button>
+
+                      {/* Fallback support or Zalo check */}
+                      <button
+                        onClick={() => setCheckoutStep('success')}
+                        className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold uppercase tracking-wider transition-colors rounded-none cursor-pointer"
+                      >
+                        Thanh toán sau / Hỗ trợ qua Zalo
+                      </button>
+                    </div>
                   )}
 
                   {checkoutStep === 'success' && (
@@ -809,6 +945,25 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                     TIẾN HÀNH ĐẶT HÀNG
                     <ArrowRight className="w-4 h-4" />
                   </button>
+                ) : checkoutStep === 'form' ? (
+                  <div className="space-y-2">
+                    <button
+                      type="submit"
+                      form="checkoutForm"
+                      disabled={submitting}
+                      className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-extrabold uppercase tracking-widest text-xs transition-colors flex items-center justify-center gap-2 rounded-none disabled:opacity-50 cursor-pointer"
+                    >
+                      {submitting ? 'ĐANG TẠO ĐƠN HÀNG...' : paymentMethod === 'BANK_TRANSFER' ? 'ĐẶT HÀNG & THANH TOÁN QR' : 'XÁC NHẬN ĐẶT HÀNG (COD)'}
+                      {!submitting && <ArrowRight className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutStep('cart')}
+                      className="w-full py-2 bg-transparent text-zinc-500 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors rounded-none cursor-pointer text-center"
+                    >
+                      ← Quay lại giỏ hàng
+                    </button>
+                  </div>
                 ) : (
                   <button
                     onClick={() => setCheckoutStep('cart')}

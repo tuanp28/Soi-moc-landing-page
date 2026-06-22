@@ -43,6 +43,7 @@ const orderPOSTBodySchema = z.object({
   cartItems: z.array(cartItemSchema).min(1, 'Giỏ hàng của bạn đang trống.'),
   couponCode: z.string().nullable().optional(),
   province: z.string().nullable().optional(),
+  paymentMethod: z.string().optional().default('COD'),
 });
 
 export async function GET(request: Request) {
@@ -168,7 +169,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const { customerName, customerPhone, customerAddress, customerNote, cartItems, couponCode, province } = parsed.data;
+    const { customerName, customerPhone, customerAddress, customerNote, cartItems, couponCode, province, paymentMethod } = parsed.data;
     couponCodeSent = couponCode || null;
 
     const cleanPhone = customerPhone.replace(/[\s().-]/g, '');
@@ -329,7 +330,7 @@ export async function POST(request: Request) {
           customerPhone: cleanPhone,
           customerAddress: province ? `${customerAddress.trim()}, ${province}` : customerAddress.trim(),
           customerNote: customerNote ? customerNote.trim() : null,
-          paymentMethod: 'COD',
+          paymentMethod: paymentMethod || 'COD',
           paymentStatus: 'pending',
           orderStatus: 'waiting_confirm',
           totalAmount: finalAmount,

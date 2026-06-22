@@ -30,7 +30,7 @@ export default function ProductDetailPage({ params }: PageProps) {
   );
   const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
   const [copied, setCopied] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, clearCart } = useCart();
 
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
   
@@ -52,6 +52,14 @@ export default function ProductDetailPage({ params }: PageProps) {
 
   const handleAddToCart = () => {
     if (product) {
+      addToCart(product, selectedWeight);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      clearCart();
+      localStorage.setItem('skip_to_checkout_form', 'true');
       addToCart(product, selectedWeight);
     }
   };
@@ -248,38 +256,47 @@ export default function ProductDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Action Buttons: Add to Cart & Consultation */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* Action Buttons: Buy Now, Add to Cart & Zalo */}
+              <div className="space-y-4">
                 <button
-                  onClick={handleAddToCart}
-                  className="flex-1 py-5 border-2 border-brand-green hover:bg-brand-green text-brand-green hover:text-white font-black text-xs tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer hover:shadow-xs select-none active:scale-[0.99]"
+                  onClick={handleBuyNow}
+                  className="w-full py-5 bg-[#C8953A] hover:bg-[#ab7c2d] text-black font-extrabold text-xs tracking-widest hover:shadow-[0_0_25px_rgba(200,149,58,0.3)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer select-none font-sans"
                 >
-                  <ShoppingBag className="w-4 h-4" />
-                  THÊM VÀO GIỎ HÀNG
+                  ⚡ MUA NGAY (THANH TOÁN QR / COD)
                 </button>
 
-                <div className="flex-1 relative group">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <button
-                    onClick={handleConsultation}
-                    className="w-full py-5 bg-gradient-to-r from-brand-green via-brand-green-hover to-brand-green text-white font-black text-xs tracking-widest hover:shadow-[0_0_25px_rgba(45,90,39,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer relative overflow-hidden select-none"
+                    onClick={handleAddToCart}
+                    className="flex-1 py-4 border-2 border-brand-green hover:bg-brand-green text-brand-green hover:text-white font-black text-xs tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer hover:shadow-xs select-none active:scale-[0.99]"
                   >
-                    <span className="absolute inset-0 w-full h-full bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                    <MessageSquare className="w-4 h-4 fill-white/10 text-white animate-pulse" />
-                    {copied ? 'ĐÃ COPY LỜI NHẮN!' : 'MUA NHANH QUA ZALO'}
+                    <ShoppingBag className="w-4 h-4" />
+                    THÊM VÀO GIỎ HÀNG
                   </button>
 
-                  <AnimatePresence>
-                    {copied && (
-                      <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold z-10"
-                      >
-                        ✓ Lời nhắn đã lưu. Dán (Paste) vào Zalo sắp mở!
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex-1 relative group">
+                    <button
+                      onClick={handleConsultation}
+                      className="w-full py-4 bg-gradient-to-r from-brand-green via-brand-green-hover to-brand-green text-white font-black text-xs tracking-widest hover:shadow-[0_0_25px_rgba(45,90,39,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 uppercase rounded-none cursor-pointer relative overflow-hidden select-none"
+                    >
+                      <span className="absolute inset-0 w-full h-full bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      <MessageSquare className="w-4 h-4 fill-white/10 text-white animate-pulse" />
+                      {copied ? 'ĐÃ COPY LỜI NHẮN!' : 'MUA NHANH QUA ZALO'}
+                    </button>
+
+                    <AnimatePresence>
+                      {copied && (
+                        <motion.p
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute left-0 right-0 -bottom-6 text-center text-[10px] text-brand-green font-bold z-10"
+                        >
+                          ✓ Lời nhắn đã lưu. Dán (Paste) vào Zalo sắp mở!
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
 

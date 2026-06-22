@@ -203,6 +203,36 @@ function StaffDashboard() {
     return matchesSearch && matchesStatus;
   });
 
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    // 1. Prioritize active orders (waiting_confirm, confirmed, shipping) over completed/cancelled ones
+    const isAActive = a.order_status !== 'completed' && a.order_status !== 'cancelled';
+    const isBActive = b.order_status !== 'completed' && b.order_status !== 'cancelled';
+
+    if (isAActive && !isBActive) return -1;
+    if (!isAActive && isBActive) return 1;
+
+    // Both are active or both are inactive
+    if (isAActive) {
+      // 2. Prioritize BANK_TRANSFER (QR code payment on web) over COD
+      const isAQR = a.payment_method === 'BANK_TRANSFER';
+      const isBQR = b.payment_method === 'BANK_TRANSFER';
+
+      if (isAQR && !isBQR) return -1;
+      if (!isAQR && isBQR) return 1;
+
+      // 3. If both are QR, prioritize 'paid' status first
+      if (isAQR && isBQR) {
+        const isAPaid = a.payment_status === 'paid';
+        const isBPaid = b.payment_status === 'paid';
+        if (isAPaid && !isBPaid) return -1;
+        if (!isAPaid && isBPaid) return 1;
+      }
+    }
+
+    // 4. Default: Newest first
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   const getOrderStatusText = (status: string) => {
     switch (status) {
       case 'waiting_confirm': return 'Chờ xác nhận';
@@ -228,6 +258,7 @@ function StaffDashboard() {
   const getPaymentStatusText = (status: string) => {
     switch (status) {
       case 'pending': return 'Chưa thanh toán';
+      case 'partial_payment': return 'Thanh toán thiếu';
       case 'paid': return 'Đã thanh toán';
       case 'refunded': return 'Đã hoàn tiền';
       default: return status;
@@ -379,13 +410,24 @@ function StaffDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2D5A27]/5 dark:divide-white/5 text-xs">
-                  {filteredOrders.map((order) => (
+                  {sortedOrders.map((order) => (
                     <tr 
                       key={order.id}
                       className="hover:bg-[#F9F4EC]/30 dark:hover:bg-white/5 transition-colors group"
                     >
                       <td className="p-4.5 font-mono text-[10px] font-bold text-[#2D5A27] dark:text-brand-green-light">
-                        #{order.id.slice(0, 8)}...
+                        <div>#{order.id.slice(0, 8)}...</div>
+                        <div className="mt-1">
+                          {order.payment_method === 'BANK_TRANSFER' ? (
+                            <span className="inline-block px-1.5 py-0.5 text-[8px] font-extrabold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase rounded-sm">
+                              🏦 Web QR
+                            </span>
+                          ) : (
+                            <span className="inline-block px-1.5 py-0.5 text-[8px] font-extrabold bg-stone-500/10 text-stone-600 dark:text-stone-400 border border-stone-500/20 uppercase rounded-sm">
+                              💵 Ship COD
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="p-4.5 text-[#5A5A5A] dark:text-stone-450">
@@ -414,10 +456,13 @@ function StaffDashboard() {
                           className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-xs outline-none bg-white dark:bg-stone-900 border cursor-pointer ${
                             order.payment_status === 'paid' 
                               ? 'text-emerald-800 border-emerald-300 bg-emerald-50 dark:text-emerald-450 dark:border-emerald-950 dark:bg-emerald-950/20' 
+                              : order.payment_status === 'partial_payment'
+                              ? 'text-orange-850 border-orange-300 bg-orange-50 dark:text-orange-400 dark:border-orange-950 dark:bg-orange-950/20'
                               : 'text-amber-800 border-amber-300 bg-amber-50 dark:text-amber-450 dark:border-amber-950 dark:bg-amber-950/20'
                           }`}
                         >
                           <option value="pending">Chưa TT</option>
+                          <option value="partial_payment">Thiếu tiền</option>
                           <option value="paid">Đã TT</option>
                           <option value="refunded">Hoàn tiền</option>
                         </select>

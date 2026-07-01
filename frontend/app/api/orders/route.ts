@@ -210,6 +210,19 @@ export async function POST(request: Request) {
       totalWeight += weightValue * item.quantity;
     }
 
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Auto-apply "Mua 5 Tặng 1" gift item (Bún Ngô Premium 500g)
+    if (totalQuantity >= 5) {
+      resolvedItems.push({
+        productId: 'bun-ngo-premium',
+        name: 'BÚN NGÔ KHÔ PREMIUM (QUÀ TẶNG MUA 5 TẶNG 1)',
+        selectedWeight: '500g',
+        quantity: 1,
+        price: 0,
+      });
+    }
+
     // Validate and apply coupon atomically to prevent concurrency race conditions
     let discount = 0;
     let appliedCoupon = null;
@@ -319,8 +332,13 @@ export async function POST(request: Request) {
         }
       }
 
+      let comboDiscount = 0;
+      if (totalQuantity >= 3) {
+        comboDiscount = Math.round(computedTotal * 0.05); // 5% discount for combo 3+ products
+      }
+
       // Guarantee invoice amount is never negative
-      const finalAmount = Math.max(0, computedTotal - discount + finalShippingFee);
+      const finalAmount = Math.max(0, computedTotal - comboDiscount - discount + finalShippingFee);
 
       // Create order first so that coupon_usages can reference it
       const newOrder = await tx.order.create({

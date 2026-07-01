@@ -190,7 +190,9 @@ export const CartDrawer: React.FC = () => {
                          totalWeight >= 5;
 
   const finalShippingFee = isFreeShipping ? 0 : shippingFee;
-  const grandTotal = cartTotal - couponDiscount + finalShippingFee;
+  const totalItemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const comboDiscount = totalItemCount >= 3 ? Math.round(cartTotal * 0.05) : 0;
+  const grandTotal = cartTotal - comboDiscount - couponDiscount + finalShippingFee;
 
   // Pre-fill name if user is logged in
   useEffect(() => {
@@ -399,6 +401,11 @@ export const CartDrawer: React.FC = () => {
       const orderId = resData.order.id;
 
       // Generate Order Text with database-saved ID
+      let giftText = '';
+      if (totalItemCount >= 5) {
+        giftText = `🎁 QUÀ TẶNG: 1x Bún Ngô Khô Premium (500g) (Miễn phí)\n`;
+      }
+
       const itemsText = cart
         .map(
           (item, index) =>
@@ -419,8 +426,8 @@ MÃ ĐƠN HÀNG: ${orderId}
 -----------------------------
 🛒 Danh sách sản phẩm:
 ${itemsText}
------------------------------
-${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDiscount.toLocaleString('vi-VN')}đ)\n-----------------------------\n` : ''}🚚 Phí vận chuyển: ${finalShippingFee === 0 ? 'Miễn phí' : `${finalShippingFee.toLocaleString('vi-VN')}đ`} (${estimatedDays})
+${giftText}-----------------------------
+${comboDiscount > 0 ? `🎉 Ưu đãi Combo (Giảm 5%): -${comboDiscount.toLocaleString('vi-VN')}đ\n-----------------------------\n` : ''}${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDiscount.toLocaleString('vi-VN')}đ)\n-----------------------------\n` : ''}🚚 Phí vận chuyển: ${finalShippingFee === 0 ? 'Miễn phí' : `${finalShippingFee.toLocaleString('vi-VN')}đ`} (${estimatedDays})
 -----------------------------
 💰 Tổng thanh toán: ${grandTotal.toLocaleString('vi-VN')}đ`;
 
@@ -526,6 +533,33 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                 <>
                   {checkoutStep === 'cart' && (
                     <div className="space-y-4">
+                      {/* Dynamic Promotion Alert Widget */}
+                      <div className="p-3 bg-brand-green/10 border border-brand-green/20 text-xs text-stone-200 space-y-1 rounded-none leading-relaxed">
+                        {totalItemCount < 3 ? (
+                          <p>
+                            💡 Mua thêm <strong className="text-amber-500 font-extrabold">{3 - totalItemCount} sản phẩm</strong> để nhận ngay <strong className="text-amber-500 font-extrabold">GIẢM GIÁ 5%</strong> tổng đơn!
+                          </p>
+                        ) : totalItemCount >= 3 && totalItemCount < 5 ? (
+                          <div className="space-y-1">
+                            <p className="text-emerald-450 font-bold">
+                              ✓ Đã áp dụng ưu đãi Combo (Giảm 5% tổng đơn)!
+                            </p>
+                            <p>
+                              🎁 Mua thêm <strong className="text-amber-500 font-extrabold">{5 - totalItemCount} sản phẩm</strong> nữa để nhận thêm <strong className="text-amber-500 font-extrabold">1 GÓI BÚN NGÔ MIỄN PHÍ!</strong>
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <p className="text-emerald-450 font-bold">
+                              ✓ Đã áp dụng giảm giá Combo 5%!
+                            </p>
+                            <p className="text-amber-450 font-bold flex items-center gap-1">
+                              🎁 Quà tặng: Bạn được tặng kèm 1 gói Bún Ngô Khô Premium (500g) miễn phí!
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
                       {cart.map((item) => (
                         <div
                           key={`${item.product.id}-${item.selectedWeight}`}
@@ -883,6 +917,12 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                   <span className="text-zinc-400">Tạm tính</span>
                   <span className="text-zinc-200 font-medium">{formatPrice(cartTotal)}</span>
                 </div>
+                {comboDiscount > 0 && (
+                  <div className="flex justify-between items-center mb-1 text-xs text-amber-500 font-bold">
+                    <span>Ưu đãi Combo (Giảm 5%)</span>
+                    <span>-{formatPrice(comboDiscount)}</span>
+                  </div>
+                )}
                 {appliedCoupon && (
                   <div className="flex justify-between items-center mb-1.5 text-xs text-emerald-450 font-bold">
                     <span>Mã giảm giá ({appliedCoupon.code})</span>
@@ -919,7 +959,7 @@ ${appliedCoupon ? `🎟️ Mã giảm giá: ${appliedCoupon.code} (-${couponDisc
                   <span className="text-zinc-400 font-medium tracking-wide text-sm">Tổng cộng</span>
                   <div className="relative inline-block pb-1">
                     <span className="text-xl font-bold text-white font-sans">
-                      {formatPrice(checkoutStep === 'cart' ? cartTotal - couponDiscount : grandTotal)}
+                      {formatPrice(checkoutStep === 'cart' ? cartTotal - comboDiscount - couponDiscount : grandTotal)}
                     </span>
                     {checkoutStep === 'form' && selectedProvince && (
                       <motion.div

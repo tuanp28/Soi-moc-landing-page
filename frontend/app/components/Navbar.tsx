@@ -1,13 +1,104 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight, ShoppingBag, Sun, Moon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, X, ArrowRight, ShoppingBag, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCart } from '@/app/context/CartContext';
 import { supabase } from '@/src/lib/supabase';
+
+interface VipTheme {
+  borderClass: string;
+  textHoverClass: string;
+  textActiveClass: string;
+  indicatorBgClass: string;
+  logoTextClass: string;
+  logoBorderClass: string;
+  badgeIcon: string | null;
+  badgeText: string;
+  badgeBgClass: string;
+  badgeBorderClass: string;
+  badgeTextClass: string;
+  cartBadgeBgClass: string;
+  themeToggleBorderClass: string;
+  glowShadowClass: string;
+}
+
+const getVipTheme = (vipLevel: string | undefined): VipTheme => {
+  const level = vipLevel?.toLowerCase() || 'normal';
+  switch (level) {
+    case 'silver':
+      return {
+        borderClass: 'border-stone-400/30 dark:border-stone-500/30 shadow-[0_2px_8px_-2px_rgba(168,162,158,0.15)]',
+        textHoverClass: 'hover:text-stone-600 dark:hover:text-stone-300',
+        textActiveClass: 'text-stone-600 dark:text-stone-300',
+        indicatorBgClass: 'bg-stone-500 dark:bg-stone-300',
+        logoTextClass: 'text-stone-700 dark:text-stone-300 drop-shadow-[0_1px_1px_rgba(168,162,158,0.1)] font-bold',
+        logoBorderClass: 'border-stone-400/40 dark:border-stone-500/40',
+        badgeIcon: '🥈',
+        badgeText: 'SILVER',
+        badgeBgClass: 'bg-stone-100 dark:bg-stone-900/50',
+        badgeBorderClass: 'border-stone-300 dark:border-stone-700',
+        badgeTextClass: 'text-stone-500 dark:text-stone-300',
+        cartBadgeBgClass: 'bg-stone-500 dark:bg-stone-400',
+        themeToggleBorderClass: 'border-stone-400/35 dark:border-stone-500/30',
+        glowShadowClass: 'shadow-[0_0_10px_rgba(168,162,158,0.2)]',
+      };
+    case 'gold':
+      return {
+        borderClass: 'border-[#C8953A]/30 dark:border-[#C8953A]/20 shadow-[0_2px_12px_-2px_rgba(200,149,58,0.2)]',
+        textHoverClass: 'hover:text-[#C8953A]',
+        textActiveClass: 'text-[#C8953A]',
+        indicatorBgClass: 'bg-[#C8953A]',
+        logoTextClass: 'text-[#C8953A] drop-shadow-[0_1px_2px_rgba(200,149,58,0.2)] font-serif font-black',
+        logoBorderClass: 'border-[#C8953A]/50 dark:border-[#C8953A]/40',
+        badgeIcon: '👑',
+        badgeText: 'GOLD',
+        badgeBgClass: 'bg-[#C8953A]/10 dark:bg-[#C8953A]/5',
+        badgeBorderClass: 'border-[#C8953A]/30',
+        badgeTextClass: 'text-[#C8953A]',
+        cartBadgeBgClass: 'bg-[#C8953A]',
+        themeToggleBorderClass: 'border-[#C8953A]/30 dark:border-[#C8953A]/20',
+        glowShadowClass: 'shadow-[0_0_12px_rgba(200,149,58,0.2)] animate-[pulse_3s_infinite]',
+      };
+    case 'diamond':
+      return {
+        borderClass: 'border-cyan-400/30 dark:border-purple-500/20 shadow-[0_3px_14px_-3px_rgba(34,211,238,0.25)]',
+        textHoverClass: 'hover:text-cyan-500 dark:hover:text-cyan-400',
+        textActiveClass: 'text-cyan-600 dark:text-cyan-400',
+        indicatorBgClass: 'bg-gradient-to-r from-cyan-400 to-purple-500',
+        logoTextClass: 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-indigo-400 to-purple-400 drop-shadow-[0_1px_3px_rgba(34,211,238,0.25)] font-serif font-extrabold',
+        logoBorderClass: 'border-cyan-400/50 dark:border-purple-500/40',
+        badgeIcon: '💎',
+        badgeText: 'DIAMOND',
+        badgeBgClass: 'bg-cyan-500/10 dark:bg-purple-950/20',
+        badgeBorderClass: 'border-cyan-400/30 dark:border-purple-500/30',
+        badgeTextClass: 'text-cyan-600 dark:text-cyan-400',
+        cartBadgeBgClass: 'bg-cyan-500 dark:bg-cyan-400',
+        themeToggleBorderClass: 'border-cyan-400/30 dark:border-purple-500/20',
+        glowShadowClass: 'shadow-[0_0_15px_rgba(34,211,238,0.25)] animate-[pulse_2s_infinite]',
+      };
+    default:
+      return {
+        borderClass: 'border-brand-green/10 dark:border-white/10 shadow-xs',
+        textHoverClass: 'hover:text-brand-green',
+        textActiveClass: 'text-brand-green',
+        indicatorBgClass: 'bg-brand-green',
+        logoTextClass: 'text-brand-green font-serif',
+        logoBorderClass: 'border-brand-green/25',
+        badgeIcon: null,
+        badgeText: '',
+        badgeBgClass: '',
+        badgeBorderClass: '',
+        badgeTextClass: '',
+        cartBadgeBgClass: 'bg-[#2D5A27]',
+        themeToggleBorderClass: 'border-[#2D5A27]/10 dark:border-white/10',
+        glowShadowClass: '',
+      };
+  }
+};
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +108,45 @@ export const Navbar: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const vipTheme = getVipTheme(profile?.vipLevel);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 2);
+      setShowRightArrow(scrollWidth - scrollLeft - clientWidth > 2);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkScroll();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [user, profile]);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -150, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 150, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
@@ -61,7 +191,7 @@ export const Navbar: React.FC = () => {
       <nav
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
-            ? 'bg-brand-cream/95 backdrop-blur-md border-b border-brand-green/10 py-3 shadow-xs'
+            ? `bg-brand-cream/95 backdrop-blur-md border-b py-3 ${vipTheme.borderClass}`
             : 'bg-transparent py-5'
         }`}
       >
@@ -71,82 +201,113 @@ export const Navbar: React.FC = () => {
             <img
               src="/images/final.png"
               alt="Logo Sợi Mộc"
-              className="w-11 h-11 rounded-full object-cover border border-brand-green/25 shadow-xs"
+              className={`w-11 h-11 rounded-full object-cover border shadow-xs transition-all duration-300 ${vipTheme.logoBorderClass}`}
             />
-            <span className="font-black text-xl tracking-tight text-brand-green font-serif">
+            <span className={`font-black text-xl tracking-tight transition-all duration-300 ${vipTheme.logoTextClass}`}>
               Sợi Mộc
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center flex-1 justify-center min-w-0 mx-4 lg:mx-6">
-            <div 
-              className="overflow-x-auto scrollbar-none flex items-center gap-4 lg:gap-5 xl:gap-7 py-2 px-1 pr-12 flex-nowrap scroll-smooth select-none max-w-[400px] lg:max-w-[500px] xl:max-w-[600px]"
-              style={{
-                maskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)'
-              }}
-            >
-              {navLinks.map((link) => {
-                const isActive = pathname === link.path;
-                return (
-                  <Link
-                    key={link.path}
-                    href={link.path}
-                    className={`text-[10px] lg:text-[11px] xl:text-xs font-black tracking-widest hover:text-brand-green transition-colors relative py-1 whitespace-nowrap flex-shrink-0 ${
-                      isActive ? 'text-brand-green' : 'text-brand-muted'
-                    }`}
-                  >
-                    {link.name}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNavIndicator"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-green"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </Link>
-                );
-              })}
+            <div className="relative flex items-center justify-center flex-1 min-w-0 max-w-[450px] lg:max-w-[550px] xl:max-w-[750px] 2xl:max-w-none">
+              {showLeftArrow && (
+                <button 
+                  onClick={scrollLeft}
+                  className="absolute left-0 z-10 p-1 bg-[#FAF6EE]/90 dark:bg-[#111510]/90 backdrop-blur-xs rounded-full border border-brand-green/10 dark:border-white/10 text-brand-charcoal hover:text-brand-green dark:text-stone-300 dark:hover:text-brand-green-light transition-all cursor-pointer shadow-xs mr-1"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+              )}
+              
+              <div 
+                ref={scrollRef}
+                onScroll={checkScroll}
+                className="overflow-x-auto scrollbar-none flex items-center gap-4 lg:gap-5 xl:gap-7 py-2 px-6 flex-nowrap scroll-smooth select-none w-full"
+                style={{
+                  maskImage: `linear-gradient(to right, ${showLeftArrow ? 'transparent' : 'black'} 0%, black 8%, black 92%, ${showRightArrow ? 'transparent' : 'black'} 100%)`,
+                  WebkitMaskImage: `linear-gradient(to right, ${showLeftArrow ? 'transparent' : 'black'} 0%, black 8%, black 92%, ${showRightArrow ? 'transparent' : 'black'} 100%)`
+                }}
+              >
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.path;
+                  return (
+                    <Link
+                      key={link.path}
+                      href={link.path}
+                      className={`text-[10px] lg:text-[11px] xl:text-xs font-black tracking-widest transition-colors relative py-1 whitespace-nowrap flex-shrink-0 ${
+                        isActive 
+                          ? (profile?.vipLevel && profile.vipLevel !== 'normal' ? vipTheme.textActiveClass : 'text-brand-green')
+                          : `text-brand-muted ${vipTheme.textHoverClass}`
+                      }`}
+                    >
+                      {link.name}
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeNavIndicator"
+                          className={`absolute bottom-0 left-0 right-0 h-0.5 ${vipTheme.indicatorBgClass}`}
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {showRightArrow && (
+                <button 
+                  onClick={scrollRight}
+                  className="absolute right-0 z-10 p-1 bg-[#FAF6EE]/90 dark:bg-[#111510]/90 backdrop-blur-xs rounded-full border border-brand-green/10 dark:border-white/10 text-brand-charcoal hover:text-brand-green dark:text-stone-300 dark:hover:text-brand-green-light transition-all cursor-pointer shadow-xs ml-1"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Profile Dropdown or Login Link (Outside the scrollable area to prevent clipping and keep always visible) */}
-            {user && profile ? (
-              <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1 flex-shrink-0 ml-4">
-                {/* Click-outside backdrop overlay */}
-                {isDropdownOpen && (
-                  <div
-                    className="fixed inset-0 z-30 cursor-default bg-transparent"
-                    onClick={() => setIsDropdownOpen(false)}
-                  />
-                )}
+          {/* Profile Dropdown or Login Link (Outside the scrollable area to prevent clipping and keep always visible) */}
+          {user && profile ? (
+            <div className="relative border-l border-brand-green/10 dark:border-white/10 pl-4 py-1 flex-shrink-0 ml-4">
+              {/* Click-outside backdrop overlay */}
+              {isDropdownOpen && (
+                <div
+                  className="fixed inset-0 z-30 cursor-default bg-transparent"
+                  onClick={() => setIsDropdownOpen(false)}
+                />
+              )}
 
-                {/* User Trigger Button */}
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2.5 hover:text-brand-green dark:hover:text-brand-green-light transition-colors relative z-40 cursor-pointer text-left"
-                >
-                  <div className="flex flex-col text-right hidden sm:flex">
-                    <span className="text-xs font-bold text-brand-charcoal dark:text-stone-250 leading-tight">
-                      {profile.fullName}
-                    </span>
-                    <span className="text-[8px] text-[#C8953A] font-black uppercase tracking-widest font-mono mt-0.5">
+              {/* User Trigger Button */}
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`flex items-center gap-2.5 transition-colors relative z-40 cursor-pointer text-left ${vipTheme.textHoverClass}`}
+              >
+                <div className="flex flex-col text-right hidden sm:flex">
+                  <span className="text-xs font-bold text-brand-charcoal dark:text-stone-250 leading-tight">
+                    {profile.fullName}
+                  </span>
+                  <div className="flex items-center justify-end gap-1 mt-0.5">
+                    {vipTheme.badgeIcon && (
+                      <span className="text-[9px] filter drop-shadow-xs">{vipTheme.badgeIcon}</span>
+                    )}
+                    <span className={`text-[8px] font-black uppercase tracking-widest font-mono ${vipTheme.badgeTextClass || 'text-brand-muted'}`}>
                       {profile.vipLevel !== 'normal' ? `${profile.vipLevel} member` : 'Standard member'}
                     </span>
                   </div>
+                </div>
 
-                  {profile.avatarUrl ? (
+                {profile.avatarUrl ? (
+                  <div className={`relative rounded-full transition-all duration-300 ${vipTheme.glowShadowClass}`}>
                     <img
                       src={profile.avatarUrl}
                       alt={profile.fullName}
-                      className="w-8 h-8 rounded-full border border-brand-green/20 hover:border-brand-green transition-all"
+                      className={`w-8 h-8 rounded-full border transition-all duration-300 ${vipTheme.logoBorderClass}`}
                     />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-xs select-none">
-                      {profile.fullName.substring(0, 1).toUpperCase()}
-                    </div>
-                  )}
-                </button>
+                  </div>
+                ) : (
+                  <div className={`w-8 h-8 rounded-full bg-brand-green-pale text-brand-green border flex items-center justify-center font-bold text-xs select-none transition-all duration-300 ${vipTheme.logoBorderClass} ${vipTheme.glowShadowClass}`}>
+                    {profile.fullName.substring(0, 1).toUpperCase()}
+                  </div>
+                )}
+              </button>
 
                 {/* Dropdown Menu */}
                 <AnimatePresence>
@@ -156,7 +317,7 @@ export const Navbar: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-3.5 w-64 bg-[#FAF6EE] dark:bg-[#171E15] border border-brand-green/10 dark:border-white/10 shadow-2xl z-40 py-3 rounded-none font-sans"
+                      className={`absolute right-0 mt-3.5 w-64 bg-[#FAF6EE] dark:bg-[#171E15] border shadow-2xl z-40 py-3 rounded-none font-sans ${vipTheme.borderClass}`}
                     >
                       {/* Header Info */}
                       <div className="px-4 py-2 border-b border-brand-green/5 dark:border-white/5 pb-3">
@@ -212,15 +373,20 @@ export const Navbar: React.FC = () => {
                           </Link>
                         )}
 
-                         {profile && (
-                           <Link
-                             href="/vip"
-                             onClick={() => setIsDropdownOpen(false)}
-                             className="flex items-center px-4 py-2.5 text-xs font-extrabold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/5 transition-colors uppercase tracking-wider"
-                           >
-                             👑 Đặc quyền VIP
-                           </Link>
-                         )}
+                        {profile && (
+                          <Link
+                            href="/vip"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className={`flex items-center px-4 py-2.5 text-xs font-extrabold transition-colors uppercase tracking-wider ${
+                              profile.vipLevel === 'diamond' ? 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/5' :
+                              profile.vipLevel === 'gold' ? 'text-[#C8953A] hover:bg-[#C8953A]/5' :
+                              profile.vipLevel === 'silver' ? 'text-stone-600 dark:text-stone-300 hover:bg-stone-500/5' :
+                              'text-brand-green dark:text-brand-green-light hover:bg-brand-green/5'
+                            }`}
+                          >
+                            👑 Đặc quyền VIP
+                          </Link>
+                        )}
                       </div>
 
                       {/* Sign Out Button */}
@@ -265,7 +431,7 @@ export const Navbar: React.FC = () => {
             {/* Theme Toggle Pill */}
             <button
               onClick={toggleTheme}
-              className="relative w-14 h-7 bg-[#D2DEC8]/80 dark:bg-[#2C3F28] border border-[#2D5A27]/10 dark:border-white/10 rounded-full flex items-center cursor-pointer p-0.5 transition-colors duration-300 select-none mr-1"
+              className={`relative w-14 h-7 bg-[#D2DEC8]/80 dark:bg-[#2C3F28] border rounded-full flex items-center cursor-pointer p-0.5 transition-colors duration-300 select-none mr-1 ${vipTheme.themeToggleBorderClass}`}
               aria-label="Toggle Theme"
             >
               <motion.div
@@ -287,12 +453,12 @@ export const Navbar: React.FC = () => {
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-brand-charcoal hover:text-brand-green transition-colors cursor-pointer flex items-center justify-center"
+              className={`relative p-2.5 text-brand-charcoal transition-colors cursor-pointer flex items-center justify-center ${vipTheme.textHoverClass}`}
               aria-label="Giỏ hàng"
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#2D5A27] text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm font-sans animate-bounce">
+                <span className={`absolute -top-0.5 -right-0.5 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-sm font-sans animate-bounce ${vipTheme.cartBadgeBgClass}`}>
                   {cartCount}
                 </span>
               )}
@@ -329,7 +495,7 @@ export const Navbar: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-[60px] bg-brand-cream border-b border-brand-green/10 z-35 md:hidden px-5 py-6 flex flex-col gap-6 shadow-xl"
+            className={`fixed inset-x-0 top-[60px] bg-brand-cream dark:bg-[#111510] border-b z-35 md:hidden px-5 py-6 flex flex-col gap-6 shadow-xl ${vipTheme.borderClass}`}
           >
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => {
@@ -339,8 +505,10 @@ export const Navbar: React.FC = () => {
                     key={link.path}
                     href={link.path}
                     onClick={() => setIsOpen(false)}
-                    className={`text-sm font-extrabold tracking-wider border-b border-brand-cream pb-2 ${
-                      isActive ? 'text-brand-green' : 'text-brand-charcoal'
+                    className={`text-sm font-extrabold tracking-wider border-b border-brand-cream/10 pb-2 ${
+                      isActive 
+                        ? (profile?.vipLevel && profile.vipLevel !== 'normal' ? vipTheme.textActiveClass : 'text-brand-green')
+                        : `text-brand-charcoal dark:text-stone-300 ${vipTheme.textHoverClass}`
                     }`}
                   >
                     {link.name}
@@ -353,26 +521,35 @@ export const Navbar: React.FC = () => {
                 <div className="flex flex-col gap-3 border-t border-brand-green/10 dark:border-white/10 pt-4">
                   <div className="flex items-center gap-3">
                     {profile.avatarUrl ? (
-                      <img
-                        src={profile.avatarUrl}
-                        alt={profile.fullName}
-                        className="w-10 h-10 rounded-full border border-brand-green/20"
-                      />
+                      <div className={`relative rounded-full transition-all duration-300 ${vipTheme.glowShadowClass}`}>
+                        <img
+                          src={profile.avatarUrl}
+                          alt={profile.fullName}
+                          className={`w-10 h-10 rounded-full border transition-all duration-300 ${vipTheme.logoBorderClass}`}
+                        />
+                      </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-brand-green-pale text-brand-green border border-brand-green/20 flex items-center justify-center font-bold text-sm">
+                      <div className={`w-10 h-10 rounded-full bg-brand-green-pale text-brand-green border flex items-center justify-center font-bold text-sm transition-all duration-300 ${vipTheme.logoBorderClass} ${vipTheme.glowShadowClass}`}>
                         {profile.fullName.substring(0, 1).toUpperCase()}
                       </div>
                     )}
                     <div className="flex flex-col">
-                      <span className="text-sm font-extrabold text-brand-charcoal dark:text-white">{profile.fullName}</span>
-                      <span className="text-[10px] text-brand-muted uppercase font-mono tracking-wider">{profile.role} | {profile.vipLevel}</span>
+                      <span className="text-sm font-extrabold text-brand-charcoal dark:text-white leading-tight">{profile.fullName}</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        {vipTheme.badgeIcon && (
+                          <span className="text-[10px] filter drop-shadow-xs">{vipTheme.badgeIcon}</span>
+                        )}
+                        <span className={`text-[10px] font-black uppercase tracking-wider font-mono ${vipTheme.badgeTextClass || 'text-brand-muted'}`}>
+                          {profile.vipLevel} member
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
                   <Link
                     href="/profile"
                     onClick={() => setIsOpen(false)}
-                    className="text-xs font-black tracking-widest text-brand-muted hover:text-brand-green uppercase"
+                    className={`text-xs font-black tracking-widest uppercase ${vipTheme.textHoverClass}`}
                   >
                     Hồ Sơ Thành Viên
                   </Link>
@@ -401,7 +578,12 @@ export const Navbar: React.FC = () => {
                     <Link
                       href="/vip"
                       onClick={() => setIsOpen(false)}
-                      className="text-xs font-black tracking-widest text-cyan-600 uppercase"
+                      className={`text-xs font-black tracking-widest uppercase ${
+                        profile.vipLevel === 'diamond' ? 'text-cyan-600 dark:text-cyan-400' :
+                        profile.vipLevel === 'gold' ? 'text-[#C8953A]' :
+                        profile.vipLevel === 'silver' ? 'text-stone-600 dark:text-stone-300' :
+                        'text-brand-green dark:text-brand-green-light'
+                      }`}
                     >
                       Đặc quyền VIP
                     </Link>
@@ -421,7 +603,7 @@ export const Navbar: React.FC = () => {
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className={`text-sm font-extrabold tracking-wider border-b border-brand-cream pb-2 ${
+                  className={`text-sm font-extrabold tracking-wider border-b border-brand-cream/10 pb-2 ${
                     pathname === '/login' ? 'text-brand-green' : 'text-brand-charcoal'
                   }`}
                 >
@@ -445,4 +627,5 @@ export const Navbar: React.FC = () => {
     </>
   );
 };
+
 export default Navbar;

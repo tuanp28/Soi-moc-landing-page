@@ -81,8 +81,8 @@ export default function ProfilePage() {
   // VIP upgrade levels configuration
   const VIP_TIERS = {
     silver: 500000,
-    gold: 2000000,
-    diamond: 5000000
+    gold: 1500000,
+    diamond: 3000000
   };
 
   // Determine next tier status

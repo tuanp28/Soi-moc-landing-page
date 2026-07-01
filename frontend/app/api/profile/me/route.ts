@@ -64,9 +64,9 @@ export async function GET(request: Request) {
       };
 
       let targetVipLevel = 'normal';
-      if (totalSpent >= 5000000) {
+      if (totalSpent >= 3000000) {
         targetVipLevel = 'diamond';
-      } else if (totalSpent >= 2000000) {
+      } else if (totalSpent >= 1500000) {
         targetVipLevel = 'gold';
       } else if (totalSpent >= 500000) {
         targetVipLevel = 'silver';

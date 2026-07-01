@@ -138,5 +138,28 @@ export const products: Product[] = [
       { weight: '500g', price: 40000, priceStr: '40.000đ', target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'specialty'
+  },
+  {
+    id: 'bun-ngu-sac-cao-tuyen',
+    name: 'BÚN NGŨ SẮC CAO TUYỀN',
+    tagline: 'SẮC MÀU THIÊN NHIÊN, HƯƠNG VỊ VÙNG CAO',
+    description: 'Sản phẩm bún ngũ sắc Cao Tuyền kết hợp gạo tẻ đặc sản vùng cao với các loại rau củ quả tự nhiên (lá cẩm, hoa đậu biếc, chùm ngây, gấc, ngô).',
+    details: 'Bún Ngũ Sắc mang lại bàn ăn rực rỡ và giàu vi chất dinh dưỡng thực vật hoàn toàn tự nhiên. Sản phẩm được sản xuất thủ công truyền thống tại Cao Bằng, không chất bảo quản, không phụ gia độc hại. 5 sắc màu tự nhiên đại diện cho màu đỏ của gấc, màu tím của lá cẩm, màu xanh của chùm ngây, màu xanh lam của đậu biếc và màu vàng của ngô tẻ chín. Sợi bún khi luộc chín dẻo dai, bóng đẹp mắt, kích thích vị giác và phù hợp cho bữa ăn gia đình lành mạnh.',
+    image: '/images/bun-ngu-sac.jpg',
+    images: ['/images/bun-ngu-sac.jpg'],
+    features: ['100% Màu tự nhiên từ rau củ quả', 'Không hàn the & chất bảo quản', 'Giàu vitamin và chất chống oxy hóa', 'Sợi dai dẻo, bóng đẹp tự nhiên'],
+    cookingTime: '5 - 7 phút',
+    nutrition: {
+      calories: '348 kcal',
+      carbs: '73.5g',
+      protein: '8.0g',
+      fiber: '3.8g',
+      fat: '0.8g'
+    },
+    sizes: [
+      { weight: '500g', price: 40000, priceStr: '40.000đ', target: 'Phù hợp 2-3 người ăn' }
+    ],
+    category: 'specialty',
+    badge: 'NEW'
   }
 ];

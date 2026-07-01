@@ -40,8 +40,95 @@ export default function Home() {
       {/* 2.5. Value Proposition Grid Showcase */}
       <ValueShowcase />
 
+      {/* 2.7. Special Promotions Section */}
+      <section className="py-20 bg-brand-cream border-t border-brand-green/5 max-w-7xl mx-auto px-5 md:px-10">
+        <div className="space-y-4 mb-12 text-center md:text-left">
+          <span className="block text-xs font-black tracking-widest text-brand-green uppercase font-mono">
+            SPECIAL PROMOTIONS
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-normal uppercase text-brand-charcoal font-serif">
+            Chương Trình Ưu Đãi Đang Diễn Ra
+          </h2>
+          <p className="text-brand-muted text-sm max-w-xl font-medium">
+            Tận hưởng các ưu đãi đặc biệt khi đặt mua bún/phở ngô sạch và dinh dưỡng trực tuyến tại website Sợi Mộc.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Promo 1: Buy 3 get 5% off */}
+          <div className="bg-white border border-brand-green/10 flex flex-col justify-between group overflow-hidden hover:border-brand-green/30 transition-all duration-300">
+            <div className="w-full relative bg-stone-100 overflow-hidden">
+              <img
+                src="/images/promo-combo-3.jpg"
+                alt="Mua Combo 3 Sản Phẩm Giảm 5%"
+                className="w-full h-auto block group-hover:scale-103 transition-transform duration-500"
+              />
+              <div className="absolute top-4 left-4 bg-amber-500 text-black px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono">
+                GIẢM 5%
+              </div>
+            </div>
+            <div className="p-6 md:p-8 space-y-4 flex-1 flex flex-col justify-between">
+              <div className="space-y-3">
+                <h3 className="text-lg md:text-xl font-bold uppercase font-serif text-brand-charcoal">
+                  Mua Combo 3 Sản Phẩm Giảm 5%
+                </h3>
+                <p className="text-xs text-brand-muted leading-relaxed font-medium">
+                  Sức khỏe nhân ba, ưu đãi tối đa! Tiết kiệm ngay 5% trên tổng giá trị hàng khi chọn mua từ 3 sản phẩm Sợi Mộc bất kỳ (Bún Ngô, Bún Đen, Bún Cẩm, Bún Ngũ Sắc...). Hệ thống tự động áp dụng khi thêm vào giỏ hàng.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-brand-green/5">
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('products-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full py-4 bg-brand-green hover:bg-brand-green-hover text-white text-[10px] font-black tracking-widest uppercase transition-all duration-300 rounded-none cursor-pointer text-center"
+                >
+                  MUA NGAY - NHẬN ƯU ĐÃI!
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Promo 2: Buy 5 Get 1 Free */}
+          <div className="bg-white border border-brand-green/10 flex flex-col justify-between group overflow-hidden hover:border-brand-green/30 transition-all duration-300">
+            <div className="w-full relative bg-stone-100 overflow-hidden">
+              <img
+                src="/images/promo-buy5get1.jpg"
+                alt="Mua 5 Tặng 1 Gói Bún Ngô"
+                className="w-full h-auto block group-hover:scale-103 transition-transform duration-500"
+              />
+              <div className="absolute top-4 left-4 bg-emerald-600 text-white px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono">
+                MUA 5 TẶNG 1
+              </div>
+            </div>
+            <div className="p-6 md:p-8 space-y-4 flex-1 flex flex-col justify-between">
+              <div className="space-y-3">
+                <h3 className="text-lg md:text-xl font-bold uppercase font-serif text-brand-charcoal">
+                  Siêu Khuyến Mại: Mua 5 Tặng 1
+                </h3>
+                <p className="text-xs text-brand-muted leading-relaxed font-medium">
+                  Mua 5 sản phẩm Sợi Mộc bất kỳ (Bún Ngô, Bún Cẩm, Bún Đen, Bún Ngũ Sắc...) - Tặng ngay 1 gói Bún Ngô Cao Tuyền (500g) hảo hạng. Áp dụng tự động cộng quà khi đặt hàng trực tuyến trên website.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-brand-green/5">
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('products-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full py-4 bg-brand-green hover:bg-brand-green-hover text-white text-[10px] font-black tracking-widest uppercase transition-all duration-300 rounded-none cursor-pointer text-center"
+                >
+                  SĂN NGAY BẬT MÀU!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 3. Product Showcase Section */}
-      <section className="py-24 max-w-7xl mx-auto px-5 md:px-10">
+      <section id="products-section" className="py-24 max-w-7xl mx-auto px-5 md:px-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="space-y-4">
             <span className="block text-xs font-black tracking-widest text-brand-green uppercase font-mono">

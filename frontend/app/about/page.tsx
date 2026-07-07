@@ -175,7 +175,7 @@ export default function AboutPage() {
               KHỞI NGUỒN TỪ CAO NGUYÊN ĐÁ
             </h2>
             <p>
-              Sợi Mộc được khai sinh từ niềm đam mê với nông sản sạch và mong muốn bảo tồn phương thức ẩm thực truyền thống của vùng đất biên viễn Cao Bằng. Chúng tôi nhận thấy hạt ngô tẻ trồng trên hốc đá có giá trị dinh dưỡng cao tuyệt vời nhưng chưa được khai thác xứng tầm.
+              Sợi Mộc được khai sinh từ niềm đam mê với nông sản sạch và mong muốn bảo tồn phương thức ẩm thực truyền thống của vùng đất Cao Bằng. Chúng tôi nhận thấy hạt ngô tẻ trồng trên hốc đá có giá trị dinh dưỡng cao tuyệt vời nhưng chưa được khai thác xứng tầm.
             </p>
             <p>
               Với trăn trở đó, đội ngũ Sợi Mộc đã nghiên cứu phối hợp cùng nghệ nhân địa phương cải tiến quy trình, kết hợp cối đá nghiền truyền thống và công nghệ sấy lạnh khép kín tuần hoàn. Kết quả là những sợi bún ngô, phở ngô khô vàng mướt ra đời - mang trọn vẹn sinh khí và sự dẻo dai của núi rừng Cao Bằng.
@@ -203,6 +203,108 @@ export default function AboutPage() {
               />
             </div>
           </motion.div>
+        </div>
+
+        {/* Fitness & Diet Section */}
+        <div className="border-t border-brand-green/10 pt-20 pb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Visual card for Gym / Diet */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5 order-last lg:order-first"
+            >
+              <div className="bg-[#2D5A27]/5 border border-[#2D5A27]/20 p-8 space-y-6 relative overflow-hidden">
+                <LeafSVG className="absolute -right-10 -bottom-10 w-40 h-40 text-[#2D5A27]/5 pointer-events-none" />
+                
+                <span className="inline-block text-[10px] font-black tracking-widest text-[#2D5A27] bg-[#2D5A27]/10 px-3 py-1 border border-[#2D5A27]/10 font-mono uppercase">
+                  NĂNG LƯỢNG SẠCH CHO THỂ HÌNH
+                </span>
+                
+                <h3 className="text-2xl font-bold font-serif text-brand-charcoal uppercase leading-[1.2]">
+                  LỰA CHỌN VÀNG CHO DÂN TẬP GYM & EAT CLEAN
+                </h3>
+                
+                <p className="text-brand-muted text-xs leading-relaxed font-medium">
+                  Với nguồn tinh bột phức hợp dồi dào từ ngô tẻ Cao Bằng và lượng calo được kiểm soát tối ưu, Sợi Mộc là giải pháp hoàn hảo thay thế tinh bột nhanh truyền thống, giúp bạn duy trì năng lượng bền bỉ và cơ bắp săn chắc.
+                </p>
+
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green flex-shrink-0 mt-0.5 font-bold text-xs">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-brand-charcoal uppercase">Chỉ số GI thấp (Glycemic Index)</h4>
+                      <p className="text-[11px] text-brand-muted mt-0.5">Hấp thu chậm, duy trì năng lượng ổn định, tránh cảm giác mệt mỏi và tích tụ mỡ thừa.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green flex-shrink-0 mt-0.5 font-bold text-xs">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-brand-charcoal uppercase">Giàu chất xơ, 100% Gluten-Free</h4>
+                      <p className="text-[11px] text-brand-muted mt-0.5">Tốt cho hệ tiêu hóa, hạn chế đầy hơi, giúp cơ thể nhẹ nhàng và no lâu hơn.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green flex-shrink-0 mt-0.5 font-bold text-xs">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-brand-charcoal uppercase">Hoàn toàn tự nhiên</h4>
+                      <p className="text-[11px] text-brand-muted mt-0.5">Không phụ gia, không hàn the, bảo toàn trọn vẹn vitamin nhóm B, E từ hạt ngô.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Narrative text & stats */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-7 space-y-6 text-brand-muted text-sm md:text-base leading-relaxed font-medium"
+            >
+              <span className="block text-xs font-black tracking-widest text-[#C8953A] uppercase font-mono">
+                FITNESS & DIET BENEFITS
+              </span>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-normal uppercase text-brand-charcoal font-serif leading-[1.15]">
+                TỪ SỢI NGÔ TỰ NHIÊN ĐẾN BỮA ĂN BỀN BỈ CHO CƠ BẮP
+              </h2>
+              <p>
+                Đối với những người đang trong chế độ ăn kiêng, giảm cân hoặc tập luyện cường độ cao, việc lựa chọn nguồn tinh bột (Carbohydrate) là yếu tố quyết định. Tinh bột từ ngô tẻ vùng cao Cao Bằng chứa hàm lượng chất xơ vượt trội cùng lượng tinh bột phức hợp (Complex Carb), giúp giải phóng glucose vào máu một cách từ từ.
+              </p>
+              <p>
+                Điều này đồng nghĩa với việc bạn sẽ có **nguồn năng lượng bền bỉ** kéo dài suốt buổi tập, không bị sụt giảm thể lực đột ngột và đặc biệt là không gặp tình trạng thèm ăn sau đó. Đây là giải pháp thay thế hoàn hảo cho cơm trắng hay bún gạo thông thường trong thực đơn Eat Clean hàng ngày.
+              </p>
+              
+              {/* Nutritional Stats Cards */}
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                <div className="bg-white border border-[#2D5A27]/10 p-4 text-center">
+                  <p className="text-xl sm:text-2xl font-black text-[#2D5A27] font-serif">Low GI</p>
+                  <p className="text-[9px] sm:text-[10px] text-brand-muted font-bold uppercase tracking-wider mt-1">Carb Hấp Thu Chậm</p>
+                </div>
+                <div className="bg-white border border-[#2D5A27]/10 p-4 text-center">
+                  <p className="text-xl sm:text-2xl font-black text-[#2D5A27] font-serif">0%</p>
+                  <p className="text-[9px] sm:text-[10px] text-brand-muted font-bold uppercase tracking-wider mt-1">Gluten & Phụ Gia</p>
+                </div>
+                <div className="bg-white border border-[#2D5A27]/10 p-4 text-center">
+                  <p className="text-xl sm:text-2xl font-black text-[#2D5A27] font-serif">100%</p>
+                  <p className="text-[9px] sm:text-[10px] text-brand-muted font-bold uppercase tracking-wider mt-1">Nguyên Chất Tự Nhiên</p>
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
         </div>
 
         {/* Core Values Section */}

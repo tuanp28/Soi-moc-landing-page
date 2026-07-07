@@ -88,7 +88,7 @@ export default function AboutPage() {
               KHỞI NGUỒN TỪ CAO NGUYÊN ĐÁ
             </h2>
             <p>
-              Sợi Mộc được khai sinh từ niềm đam mê với nông sản sạch và mong muốn bảo tồn phương thức ẩm thực truyền thống của vùng đất biên viễn Cao Bằng. Chúng tôi nhận thấy hạt ngô tẻ trồng trên hốc đá có giá trị dinh dưỡng cao tuyệt vời nhưng chưa được khai thác xứng tầm.
+              Sợi Mộc được khai sinh từ niềm đam mê với nông sản sạch và mong muốn bảo tồn phương thức ẩm thực truyền thống của vùng đất Cao Bằng. Chúng tôi nhận thấy hạt ngô tẻ trồng trên hốc đá có giá trị dinh dưỡng cao tuyệt vời nhưng chưa được khai thác xứng tầm.
             </p>
             <p>
               Với trăn trở đó, đội ngũ Sợi Mộc đã nghiên cứu phối hợp cùng nghệ nhân địa phương cải tiến quy trình, kết hợp cối đá nghiền truyền thống và công nghệ sấy lạnh khép kín tuần hoàn. Kết quả là những sợi bún ngô, phở ngô khô vàng mướt ra đời - mang trọn vẹn sinh khí và sự dẻo dai của núi rừng Cao Bằng.

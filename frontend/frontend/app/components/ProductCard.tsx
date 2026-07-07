@@ -13,8 +13,15 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Format prices
-  const minPrice = Math.min(...product.sizes.map((s) => s.price));
+  const minPriceSize = product.sizes.reduce((prev, curr) => prev.price < curr.price ? prev : curr);
+  const minPrice = minPriceSize.price;
   const maxPrice = Math.max(...product.sizes.map((s) => s.price));
+  
+  const hasDiscount = !!minPriceSize.originalPrice && minPriceSize.originalPrice > minPrice;
+  const discountPercent = hasDiscount 
+    ? Math.round(((minPriceSize.originalPrice! - minPrice) / minPriceSize.originalPrice!) * 100)
+    : 0;
+
   const priceRange = minPrice === maxPrice 
     ? minPrice.toLocaleString('vi-VN') + 'đ'
     : `${minPrice.toLocaleString('vi-VN')}đ - ${maxPrice.toLocaleString('vi-VN')}đ`;
@@ -45,6 +52,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           loading="lazy"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        
+        {/* Shopee-style Discount Tag */}
+        {hasDiscount && (
+          <div 
+            className="absolute top-0 right-2 bg-[#ffd839]/95 text-[#ee4d2d] z-20 flex flex-col items-center justify-center w-11 pt-2 pb-3 font-sans text-[10px] font-bold shadow-xs select-none"
+            style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%)' }}
+          >
+            <span className="text-[13px] font-black leading-none">{discountPercent}%</span>
+            <span className="text-[9px] font-bold text-white bg-[#ee4d2d] px-1 rounded-[1.5px] uppercase leading-none py-0.5 mt-1 font-mono">GIẢM</span>
+          </div>
+        )}
         
         {/* Quick Tech Overlay */}
         <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 border border-brand-green/10 font-mono text-[8px] text-brand-muted tracking-wider uppercase font-semibold z-10">
@@ -77,14 +95,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="mt-6 pt-4 border-t border-brand-green/5 flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-[9px] text-brand-muted/55 font-bold uppercase tracking-wider">Giá từ</p>
-            <p className="text-base font-extrabold text-brand-charcoal font-sans">{priceRange}</p>
+            {hasDiscount ? (
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg sm:text-xl font-extrabold text-[#ee4d2d] dark:text-[#ff6046] font-sans leading-none">
+                  {minPrice.toLocaleString('vi-VN')}đ
+                </span>
+                <span className="text-xs text-brand-muted/65 line-through font-medium font-sans">
+                  {minPriceSize.originalPrice!.toLocaleString('vi-VN')}đ
+                </span>
+              </div>
+            ) : (
+              <p className="text-base sm:text-lg font-extrabold text-brand-charcoal font-sans">{priceRange}</p>
+            )}
           </div>
 
           <Link
             href={`/products/${product.id}`}
             className="px-4 py-2.5 bg-brand-charcoal hover:bg-brand-green text-white hover:text-white transition-all duration-300 text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5 cursor-pointer hover:shadow-xs active:scale-95"
           >
-            CHI TIẾT
+            ĐẶT MUA
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300" />
           </Link>
         </div>

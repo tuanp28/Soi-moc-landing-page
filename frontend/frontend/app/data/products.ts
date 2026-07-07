@@ -19,6 +19,7 @@ export interface Product {
     weight: string;
     price: number;
     priceStr: string;
+    originalPrice?: number;
     target: string;
   }[];
   category: 'corn' | 'specialty';
@@ -68,7 +69,7 @@ export const products: Product[] = [
       fat: '1.1g'
     },
     sizes: [
-      { weight: '500g', price: 32000, priceStr: '32.000đ', target: 'Phù hợp 2-3 người ăn' },
+      { weight: '500g', price: 32000, priceStr: '32.000đ', originalPrice: 35000, target: 'Phù hợp 2-3 người ăn' },
       { weight: '1kg', price: 64000, priceStr: '64.000đ', target: 'Gia đình 4-5 người ăn' }
     ],
     category: 'corn',

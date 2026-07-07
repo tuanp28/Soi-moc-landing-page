@@ -23,6 +23,13 @@ export default function ProductDetailPage({ params }: PageProps) {
   const productImages = product.images && product.images.length > 0 ? product.images : [product.image];
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState(product.sizes[0].weight);
+
+  // Check if current product has discount
+  const sizeWithDiscount = product.sizes.find((s) => s.originalPrice && s.originalPrice > s.price);
+  const pageHasDiscount = !!sizeWithDiscount;
+  const pageDiscountPercent = sizeWithDiscount 
+    ? Math.round(((sizeWithDiscount.originalPrice! - sizeWithDiscount.price) / sizeWithDiscount.originalPrice!) * 100)
+    : 0;
   const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
   const [copied, setCopied] = useState(false);
   
@@ -62,6 +69,17 @@ export default function ProductDetailPage({ params }: PageProps) {
               {product.badge && (
                 <div className="absolute top-4 left-4 bg-brand-green text-white px-3 py-1.5 text-[10px] font-black tracking-widest uppercase font-mono z-25 shadow-sm">
                   {product.badge}
+                </div>
+              )}
+
+              {/* Shopee-style Discount Tag on Main Image */}
+              {pageHasDiscount && (
+                <div 
+                  className="absolute top-0 right-4 bg-[#ffd839]/95 text-[#ee4d2d] z-25 flex flex-col items-center justify-center w-13 pt-2.5 pb-4 font-sans text-[11px] font-bold shadow-md select-none"
+                  style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%)' }}
+                >
+                  <span className="text-[15px] font-black leading-none">{pageDiscountPercent}%</span>
+                  <span className="text-[9.5px] font-bold text-white bg-[#ee4d2d] px-1.5 rounded-[1.5px] uppercase leading-none py-0.5 mt-1.5 font-mono">GIẢM</span>
                 </div>
               )}
               
@@ -216,14 +234,26 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Price Details */}
-              <div className="flex items-center justify-between gap-6 bg-white p-4 border border-brand-green/10">
+              <div className="flex items-center justify-between gap-6 bg-[#f53d2d]/5 p-4.5 border border-[#f53d2d]/10">
                 <div className="space-y-1">
-                  <span className="text-[9px] text-brand-muted/70 font-bold uppercase tracking-wider block">
-                    Giá tham khảo
+                  <span className="text-[10px] text-[#ee4d2d] font-black uppercase tracking-wider block font-mono">
+                    MỨC GIÁ ƯU ĐÃI
                   </span>
-                  <span className="text-2xl font-black text-brand-charcoal font-sans">
-                    {sizeInfo.priceStr}
-                  </span>
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-4xl font-black text-[#ee4d2d] font-sans">
+                      {sizeInfo.priceStr}
+                    </span>
+                    {sizeInfo.originalPrice && sizeInfo.originalPrice > sizeInfo.price && (
+                      <>
+                        <span className="text-base text-brand-muted/60 line-through font-normal font-sans">
+                          {sizeInfo.originalPrice.toLocaleString('vi-VN')}đ
+                        </span>
+                        <span className="text-xs font-black bg-[#ee4d2d] text-white px-2 py-0.5 rounded-[2px] uppercase leading-none font-mono">
+                          -{Math.round(((sizeInfo.originalPrice - sizeInfo.price) / sizeInfo.originalPrice) * 100)}% GIẢM
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 text-xs text-brand-muted font-medium">

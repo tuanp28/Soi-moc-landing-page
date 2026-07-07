@@ -19,6 +19,7 @@ export interface Product {
     weight: string;
     price: number;
     priceStr: string;
+    originalPrice?: number;
     target: string;
   }[];
   category: 'corn' | 'specialty';
@@ -67,7 +68,7 @@ export const products: Product[] = [
       fat: '1.1g'
     },
     sizes: [
-      { weight: '500g', price: 32000, priceStr: '32.000đ', target: 'Phù hợp 2-3 người ăn' }
+      { weight: '500g', price: 32000, priceStr: '32.000đ', originalPrice: 35000, target: 'Phù hợp 2-3 người ăn' }
     ],
     category: 'corn',
     badge: 'NEW'
@@ -145,8 +146,8 @@ export const products: Product[] = [
     tagline: 'SẮC MÀU THIÊN NHIÊN, HƯƠNG VỊ VÙNG CAO',
     description: 'Sản phẩm bún ngũ sắc Cao Tuyền kết hợp tinh bột gạo lứt huyết rồng đặc sản vùng cao với các loại rau củ quả tự nhiên (lá cẩm, hoa đậu biếc, chùm ngây).',
     details: 'Bún Ngũ Sắc mang lại bàn ăn rực rỡ và giàu vi chất dinh dưỡng thực vật hoàn toàn tự nhiên. Sản phẩm được sản xuất thủ công truyền thống tại Cao Bằng, không chất bảo quản, không phụ gia độc hại. 5 sắc màu tự nhiên đại diện cho màu đỏ từ tinh bột gạo lứt huyết rồng, màu tím từ lá cẩm, màu xanh từ chùm ngây, màu xanh lam từ hoa đậu biếc và màu vàng từ ngô chín. Sợi bún khi luộc chín dẻo dai, bóng đẹp mắt, kích thích vị giác và phù hợp cho bữa ăn lành mạnh.',
-    image: '/images/bun-ngu-sac.jpg',
-    images: ['/images/bun-ngu-sac.jpg'],
+    image: '/images/bun-ngu-sac-new.jpg',
+    images: ['/images/bun-ngu-sac-new.jpg', '/images/bun-ngu-sac.jpg'],
     features: ['Tinh bột gạo lứt huyết rồng bổ dưỡng', '100% Màu tự nhiên từ rau củ quả', 'Không hàn the & chất bảo quản', 'Giàu vitamin và chất chống oxy hóa', 'Sợi dai dẻo, bóng đẹp tự nhiên'],
     cookingTime: '5 - 7 phút',
     nutrition: {

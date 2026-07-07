@@ -41,6 +41,38 @@ export async function getDbProducts(): Promise<Product[]> {
       dbProducts = await prisma.product.findMany({
         orderBy: { createdAt: 'asc' }
       });
+    } else {
+      // Auto-sync static products sizes, badge, image and imagesJson to DB to keep everything updated
+      await Promise.all(
+        staticProducts.map(async (p) => {
+          const dbProd = dbProducts.find((dp) => dp.id === p.id);
+          if (dbProd) {
+            const staticSizesStr = JSON.stringify(p.sizes || []);
+            const staticImagesStr = JSON.stringify(p.images || [p.image]);
+            if (
+              dbProd.sizesJson !== staticSizesStr || 
+              dbProd.badge !== (p.badge || null) ||
+              dbProd.image !== p.image ||
+              dbProd.imagesJson !== staticImagesStr
+            ) {
+              await prisma.product.update({
+                where: { id: p.id },
+                data: {
+                  sizesJson: staticSizesStr,
+                  badge: p.badge || null,
+                  image: p.image,
+                  imagesJson: staticImagesStr
+                }
+              });
+            }
+          }
+        })
+      );
+
+      // Re-fetch to get updated values
+      dbProducts = await prisma.product.findMany({
+        orderBy: { createdAt: 'asc' }
+      });
     }
 
     // Filter to active products for customers

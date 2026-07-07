@@ -26,6 +26,14 @@ interface OrderItem {
   price: number;
 }
 
+interface StatusHistory {
+  id: string;
+  status: string;
+  changedBy: string | null;
+  changedAt: string;
+  note: string | null;
+}
+
 interface OrderDetails {
   id: string;
   customerName: string;
@@ -38,6 +46,7 @@ interface OrderDetails {
   totalAmount: number;
   createdAt: string;
   items: OrderItem[];
+  statusHistory?: StatusHistory[];
 }
 
 export default function OrderLookupPage() {
@@ -265,6 +274,41 @@ export default function OrderLookupPage() {
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Detailed Status Log Timeline */}
+                {order.statusHistory && order.statusHistory.length > 0 && (
+                  <div className="mt-10 border-t border-[#2D5A27]/10 dark:border-white/10 pt-8 space-y-4">
+                    <h4 className="text-[10px] font-black tracking-widest text-[#2D5A27] dark:text-brand-green-light uppercase font-mono mb-4">
+                      Nhật ký hành trình đơn hàng
+                    </h4>
+                    <div className="relative pl-6 border-l border-[#2D5A27]/20 dark:border-white/10 space-y-6">
+                      {order.statusHistory.map((h, idx) => (
+                        <div key={h.id} className="relative">
+                          {/* Indicator dot */}
+                          <div className={`absolute -left-[28px] top-1.5 w-3 h-3 rounded-full border-2 bg-white dark:bg-stone-900 ${
+                            idx === order.statusHistory!.length - 1 ? 'border-[#2D5A27] bg-[#2D5A27] animate-pulse' : 'border-stone-300'
+                          }`} />
+                          <div className="space-y-1">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                              <span className="text-xs font-bold text-brand-charcoal dark:text-white">
+                                {translateOrderStatus(h.status)}
+                              </span>
+                              <span className="text-[9px] font-bold font-mono text-brand-muted bg-[#F9F4EC]/60 dark:bg-stone-900 px-2 py-0.5 uppercase">
+                                {h.changedBy || 'Hệ thống'}
+                              </span>
+                              <span className="text-[9px] font-mono text-brand-muted sm:ml-auto">
+                                {new Date(h.changedAt).toLocaleString('vi-VN')}
+                              </span>
+                            </div>
+                            {h.note && (
+                              <p className="text-xs text-brand-muted font-sans mt-0.5">{h.note}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

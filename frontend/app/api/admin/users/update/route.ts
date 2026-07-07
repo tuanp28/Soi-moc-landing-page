@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '@/src/lib/prisma';
+import { logAuditEvent } from '@/src/lib/audit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wanuvqejxogotqrxmdck.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_bYvknsun39Hg3d4xYQKSVA_7-IiLCCb';
@@ -67,6 +68,17 @@ export async function POST(request: Request) {
         ...(vipLevel && { vipLevel }),
       },
     });
+
+    // Write audit log
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
+    await logAuditEvent(
+      adminProfile.id,
+      adminProfile.email,
+      'UPDATE_USER_ROLE_VIP',
+      { targetUserId, targetEmail: targetProfile.email, role, vipLevel },
+      ip
+    );
 
     return NextResponse.json({ success: true, profile: updatedProfile });
   } catch (err: any) {

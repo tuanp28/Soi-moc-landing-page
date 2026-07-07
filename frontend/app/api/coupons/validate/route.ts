@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '@/src/lib/prisma';
-import { products } from '@/app/data/products';
+import { getDbProducts } from '@/app/data/productsDb';
 import { checkRateLimit, recordFailedAttempt } from '@/src/lib/rateLimit';
 import { z } from 'zod';
 
@@ -74,6 +74,7 @@ export async function POST(request: Request) {
     const normalizedCode = code.trim().toUpperCase();
 
     // 2. Validate Cart and Recalculate original total server-side
+    const products = await getDbProducts();
     let computedTotal = 0;
     for (const item of cartItems) {
       const prod = products.find((p) => p.id === item.productId);

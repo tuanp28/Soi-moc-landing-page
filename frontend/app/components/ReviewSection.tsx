@@ -14,7 +14,11 @@ interface Review {
   rating: number;
 }
 
-export const ReviewSection: React.FC = () => {
+interface ReviewSectionProps {
+  productId?: string;
+}
+
+export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
   const { user, session } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +37,8 @@ export const ReviewSection: React.FC = () => {
   // Fetch reviews from API
   const fetchReviews = async () => {
     try {
-      const res = await fetch('/api/reviews');
+      const url = productId ? `/api/reviews?productId=${productId}` : '/api/reviews';
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setReviews(data.reviews || []);
@@ -96,7 +101,8 @@ export const ReviewSection: React.FC = () => {
         body: JSON.stringify({
           text,
           rating,
-          location: location.trim()
+          location: location.trim(),
+          productId: productId || null
         })
       });
 

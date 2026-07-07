@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import { products as localProducts, Product } from '../../data/products';
 import { ArrowLeft, Clock, MessageSquare, ShieldCheck, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
@@ -17,17 +17,60 @@ interface PageProps {
 export default function ProductDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
   
-  // Find product from static list directly to ensure instant loading
-  const product = localProducts.find((p) => p.id === resolvedParams.id);
+  const [product, setProduct] = useState<Product | undefined>(() =>
+    localProducts.find((p) => p.id === resolvedParams.id)
+  );
+  const [loading, setLoading] = useState(true);
 
-  if (!product) {
-    notFound();
-  }
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.products) {
+          const dbProd = data.products.find((p: any) => p.id === resolvedParams.id);
+          if (dbProd) {
+            setProduct(dbProd);
+          }
+        }
+      })
+      .catch((err) => console.error('Error loading product:', err))
+      .finally(() => setLoading(false));
+  }, [resolvedParams.id]);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedWeight, setSelectedWeight] = useState<string>(
-    product.sizes && product.sizes.length > 0 ? product.sizes[0].weight : ''
-  );
+  const [selectedWeight, setSelectedWeight] = useState<string>('');
+
+  useEffect(() => {
+    if (product && product.sizes && product.sizes.length > 0 && !selectedWeight) {
+      setSelectedWeight(product.sizes[0].weight);
+    }
+  }, [product, selectedWeight]);
+
+  if (loading && !product) {
+    return (
+      <div className="bg-brand-cream text-brand-charcoal min-h-[90vh] flex items-center justify-center font-sans">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-bold tracking-widest text-brand-muted uppercase font-mono">Đang tải sản phẩm...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="bg-brand-cream text-brand-charcoal min-h-[90vh] flex items-center justify-center font-sans">
+        <div className="text-center space-y-6 max-w-md px-5">
+          <h2 className="text-2xl font-bold font-serif text-[#2D5A27]">Không Tìm Thấy Sản Phẩm</h2>
+          <p className="text-brand-muted text-sm leading-relaxed">Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã ngừng kinh doanh.</p>
+          <Link href="/products" className="inline-block px-6 py-3 bg-brand-green text-white text-xs font-black tracking-widest uppercase hover:bg-brand-green transition-colors">
+            Quay lại cửa hàng
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const [activeTab, setActiveTab] = useState<'nutrition' | 'cooking' | 'origin'>('nutrition');
   const [copied, setCopied] = useState(false);
   const { addToCart, clearCart } = useCart();
@@ -415,7 +458,7 @@ export default function ProductDetailPage({ params }: PageProps) {
       </div>
       
       {/* Reviews Section */}
-      <ReviewSection />
+      <ReviewSection productId={product.id} />
     </div>
   );
 }

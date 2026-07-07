@@ -5,9 +5,13 @@ import prisma from '@/src/lib/prisma';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wanuvqejxogotqrxmdck.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_bYvknsun39Hg3d4xYQKSVA_7-IiLCCb';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get('productId');
+
     const reviews = await prisma.review.findMany({
+      where: productId ? { productId } : {},
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json({ success: true, reviews });
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { text, rating, location } = body;
+    const { text, rating, location, productId } = body;
 
     if (!text || typeof text !== 'string' || text.trim() === '') {
       return NextResponse.json({ success: false, error: 'Nội dung đánh giá không được để trống.' }, { status: 400 });
@@ -64,7 +68,8 @@ export async function POST(request: Request) {
         location: cleanLocation,
         text: text.trim(),
         rating: ratingVal,
-        userId: user.id
+        userId: user.id,
+        productId: productId || null
       }
     });
 

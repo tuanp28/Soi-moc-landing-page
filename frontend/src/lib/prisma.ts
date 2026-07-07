@@ -22,7 +22,13 @@ declare global {
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = (globalThis.prisma && 'order' in globalThis.prisma && 'review' in globalThis.prisma) 
+const prisma = (
+  globalThis.prisma && 
+  'order' in globalThis.prisma && 
+  'review' in globalThis.prisma &&
+  'profile' in globalThis.prisma &&
+  'auditLog' in globalThis.prisma
+) 
   ? globalThis.prisma 
   : prismaClientSingleton();
 

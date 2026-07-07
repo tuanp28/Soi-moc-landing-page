@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { products } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,9 +15,21 @@ const LeafSVG: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export default function ProductsPage() {
+  const [productsList, setProductsList] = useState(products);
   const [filter, setFilter] = useState<CategoryFilter>('all');
 
-  const filteredProducts = products.filter((product) => {
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.products) {
+          setProductsList(data.products);
+        }
+      })
+      .catch((err) => console.error('Error loading products:', err));
+  }, []);
+
+  const filteredProducts = productsList.filter((product) => {
     if (filter === 'all') return true;
     return product.category === filter;
   });

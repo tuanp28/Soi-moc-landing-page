@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '@/src/lib/prisma';
-import { products } from '@/app/data/products';
+import { getDbProducts } from '@/app/data/productsDb';
 import { checkRateLimit, recordFailedAttempt } from '@/src/lib/rateLimit';
 import { z } from 'zod';
+import { sendOrderNotification } from '@/src/lib/notifications';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wanuvqejxogotqrxmdck.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_bYvknsun39Hg3d4xYQKSVA_7-IiLCCb';
@@ -178,6 +179,7 @@ export async function POST(request: Request) {
     }
 
     // Recalculate original total on the server to prevent F12 price tampering
+    const products = await getDbProducts();
     let computedTotal = 0;
     let totalWeight = 0;
     const resolvedItems: any[] = [];
@@ -387,6 +389,19 @@ export async function POST(request: Request) {
       return newOrder;
     });
 
+    // Create initial history log
+    await prisma.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        status: 'waiting_confirm',
+        changedBy: 'Khách hàng',
+        note: 'Đơn hàng mới đã được khởi tạo thành công.'
+      }
+    });
+
+    // Send email notification asynchronously
+    sendOrderNotification(order.id, 'order_created');
+
     return NextResponse.json({
       success: true,
       message: 'Đặt hàng thành công!',
@@ -414,6 +429,9 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
+
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json({ success: false, error: 'Chưa đăng nhập.' }, { status: 401 });
@@ -491,6 +509,47 @@ export async function PATCH(request: Request) {
         }
       }
 
+      // 3. Write status history log
+      const actorName = profile ? `${profile.fullName} (${profile.role === 'admin' ? 'Admin' : profile.role === 'staff' ? 'Nhân viên' : 'Quản lý'})` : 'Khách hàng';
+      const noteText = field === 'order_status' 
+        ? `Trạng thái đơn hàng chuyển sang: ${status}`
+        : `Trạng thái thanh toán chuyển sang: ${status}`;
+
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: orderId,
+          status: status,
+          changedBy: actorName,
+          note: noteText
+        }
+      });
+
+      // 4. Award points to user if order is completed
+      if (field === 'order_status' && status === 'completed' && order.orderStatus !== 'completed') {
+        if (order.userId) {
+          const pointsGained = Math.floor(order.totalAmount / 1000); // 1,000đ = 1 point
+          await tx.profile.update({
+            where: { id: order.userId },
+            data: {
+              points: { increment: pointsGained }
+            }
+          });
+        }
+      }
+
+      // 5. Write audit log for staff/manager/admin
+      if (profile && ['staff', 'manager', 'admin'].includes(profile.role)) {
+        await tx.auditLog.create({
+          data: {
+            userId: profile.id,
+            userEmail: profile.email,
+            action: field === 'order_status' ? 'UPDATE_ORDER_STATUS' : 'UPDATE_ORDER_PAYMENT',
+            details: JSON.stringify({ orderId, status }),
+            ipAddress: ip
+          }
+        });
+      }
+
       return await tx.order.update({
         where: { id: orderId },
         data: {
@@ -498,6 +557,13 @@ export async function PATCH(request: Request) {
         },
       });
     });
+
+    // Trigger status update email notifications asynchronously
+    if (field === 'order_status' && status === 'shipping') {
+      sendOrderNotification(orderId, 'order_shipped');
+    } else if (field === 'payment_status' && status === 'paid') {
+      sendOrderNotification(orderId, 'payment_paid');
+    }
 
     return NextResponse.json({
       success: true,

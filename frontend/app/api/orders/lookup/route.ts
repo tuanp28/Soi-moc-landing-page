@@ -61,6 +61,12 @@ export async function POST(request: Request) {
       console.error('Error parsing itemsJson:', e);
     }
 
+    // Fetch status history log
+    const statusHistory = await prisma.orderStatusHistory.findMany({
+      where: { orderId: order.id },
+      orderBy: { changedAt: 'asc' }
+    });
+
     const orderData = {
       id: order.id,
       customerName: order.customerName,
@@ -72,7 +78,14 @@ export async function POST(request: Request) {
       orderStatus: order.orderStatus,
       totalAmount: order.totalAmount,
       createdAt: order.createdAt,
-      items: items
+      items: items,
+      statusHistory: statusHistory.map(h => ({
+        id: h.id,
+        status: h.status,
+        changedBy: h.changedBy,
+        changedAt: h.changedAt.toISOString(),
+        note: h.note
+      }))
     };
 
     return NextResponse.json({ success: true, order: orderData });

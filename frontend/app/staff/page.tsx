@@ -104,6 +104,27 @@ function StaffDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [isUsingMock, setIsUsingMock] = useState(false);
+  const [selectedOrderHistory, setSelectedOrderHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (selectedOrder && selectedOrder.id) {
+      setSelectedOrderHistory([]);
+      fetch('/api/orders/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder.id, phone: selectedOrder.customer_phone })
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.order && data.order.statusHistory) {
+          setSelectedOrderHistory(data.order.statusHistory);
+        }
+      })
+      .catch((err) => console.error('Error loading order history:', err));
+    } else {
+      setSelectedOrderHistory([]);
+    }
+  }, [selectedOrder?.id]);
 
   const fetchOrders = async () => {
     if (!session) return;
@@ -176,6 +197,20 @@ function StaffDashboard() {
 
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, [field]: newStatus } : null);
+        // Refresh history log
+        setTimeout(() => {
+          fetch('/api/orders/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, phone: selectedOrder.customer_phone })
+          })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.order && data.order.statusHistory) {
+              setSelectedOrderHistory(data.order.statusHistory);
+            }
+          });
+        }, 500);
       }
     } catch (err) {
       console.error('Failed to update status:', err);
@@ -673,6 +708,42 @@ function StaffDashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Status History Timeline for Staff */}
+                  {selectedOrderHistory && selectedOrderHistory.length > 0 && (
+                    <div className="border-t border-[#2D5A27]/10 dark:border-white/10 pt-4 mt-6 space-y-3">
+                      <h5 className="text-[10px] font-black tracking-widest text-brand-muted uppercase font-mono">
+                        Nhật ký hành trình đơn
+                      </h5>
+                      <div className="relative pl-5 border-l border-[#2D5A27]/15 dark:border-white/10 space-y-4 text-[11px] font-sans">
+                        {selectedOrderHistory.map((h, idx) => (
+                          <div key={h.id} className="relative">
+                            <div className={`absolute -left-[25px] top-1 w-2.5 h-2.5 rounded-full border bg-white dark:bg-stone-900 ${
+                              idx === selectedOrderHistory.length - 1 ? 'border-[#2D5A27] bg-[#2D5A27] animate-pulse' : 'border-stone-300'
+                            }`} />
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold uppercase text-[9px] text-[#2D5A27] dark:text-brand-green-light">
+                                  {h.status === 'waiting_confirm' ? 'Chờ xác nhận' :
+                                   h.status === 'confirmed' ? 'Đã xác nhận' :
+                                   h.status === 'shipping' ? 'Đang giao' :
+                                   h.status === 'completed' ? 'Hoàn thành' :
+                                   h.status === 'cancelled' ? 'Đã hủy' : h.status}
+                                </span>
+                                <span className="text-[8px] font-bold text-brand-muted bg-stone-100 dark:bg-stone-850 px-1 py-0.5 uppercase">
+                                  {h.changedBy || 'Hệ thống'}
+                                </span>
+                                <span className="text-[8px] font-mono text-brand-muted ml-auto">
+                                  {new Date(h.changedAt).toLocaleString('vi-VN')}
+                                </span>
+                              </div>
+                              {h.note && <p className="text-brand-muted mt-0.5">{h.note}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-5 border-t border-[#2D5A27]/10 dark:border-white/10 bg-[#F9F4EC]/20 dark:bg-stone-950/10 flex justify-end">

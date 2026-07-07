@@ -52,6 +52,11 @@ export default function ProfilePage() {
   const [loadingCoupons, setLoadingCoupons] = useState(true);
   const [copiedCouponCode, setCopiedCouponCode] = useState<string | null>(null);
 
+  // Points redemption states
+  const [redeemingOption, setRedeemingOption] = useState<number | null>(null);
+  const [redeemSuccessVoucher, setRedeemSuccessVoucher] = useState<string | null>(null);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
+
   // Parse user metadata & date details
   const fullName = profile?.fullName || user?.user_metadata?.full_name || 'Khách hàng Sợi Mộc';
   const email = profile?.email || user?.email || 'N/A';
@@ -295,6 +300,43 @@ export default function ProfilePage() {
     setTimeout(() => {
       setCopiedCouponCode(null);
     }, 2000);
+  };
+
+  const handleRedeemPoints = async (option: number) => {
+    if (!session) return;
+    setRedeemingOption(option);
+    setRedeemError(null);
+    setRedeemSuccessVoucher(null);
+    try {
+      const response = await fetch('/api/profile/redeem-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ option })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setRedeemSuccessVoucher(data.coupon.code);
+        await refreshProfile();
+        // Refresh coupons list
+        const resC = await fetch('/api/coupons', {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (resC.ok) {
+          const dataC = await resC.json();
+          setCoupons(dataC.coupons || []);
+        }
+      } else {
+        setRedeemError(data.error || 'Quy đổi điểm thưởng thất bại.');
+      }
+    } catch (err) {
+      console.error('Error redeeming points:', err);
+      setRedeemError('Lỗi hệ thống khi quy đổi.');
+    } finally {
+      setRedeemingOption(null);
+    }
   };
 
   const getClaimedVouchers = () => {
@@ -565,6 +607,99 @@ export default function ProfilePage() {
                         </span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Điểm Tích Lũy & Đổi Quà */}
+              <div className="bg-white border border-[#2D5A27]/10 p-6 md:p-8 shadow-xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-[#2D5A27]/5">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[#C8953A]" />
+                    <h3 className="font-extrabold text-sm uppercase tracking-widest font-mono">
+                      Tích Lũy Điểm Thưởng
+                    </h3>
+                  </div>
+                  <div className="bg-[#2D5A27]/5 border border-[#2D5A27]/20 px-3 py-1 font-mono text-xs font-bold text-[#2D5A27]">
+                    {profile?.points || 0} ĐIỂM
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-[10px] text-brand-muted leading-relaxed uppercase tracking-wider font-mono">
+                    Tích lũy 1 điểm cho mỗi 1.000đ thanh toán đơn hàng. Sử dụng điểm thưởng của bạn để quy đổi lấy các mã giảm giá mua hàng đặc biệt:
+                  </p>
+
+                  {redeemError && (
+                    <div className="p-3 bg-red-50 text-red-700 text-xs font-bold font-sans">
+                      Lỗi: {redeemError}
+                    </div>
+                  )}
+
+                  {redeemSuccessVoucher && (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2 relative">
+                      <p className="font-extrabold uppercase tracking-wide">Quy đổi thành công!</p>
+                      <p>Bạn nhận được mã voucher giảm giá:</p>
+                      <div className="flex items-center justify-between bg-white border border-emerald-300 p-2 font-mono text-sm font-bold text-[#2D5A27]">
+                        <span>{redeemSuccessVoucher}</span>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(redeemSuccessVoucher);
+                            alert('Đã sao chép mã giảm giá!');
+                          }}
+                          className="text-[10px] font-black uppercase text-brand-muted hover:text-[#2D5A27]"
+                        >
+                          Sao chép
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-brand-muted italic mt-1">*Hạn sử dụng trong vòng 30 ngày kể từ lúc quy đổi.</p>
+                      <button 
+                        onClick={() => setRedeemSuccessVoucher(null)} 
+                        className="absolute top-2 right-2 text-stone-400 hover:text-stone-600 font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { points: 150, value: 15000, label: 'Voucher 15k' },
+                      { points: 300, value: 35000, label: 'Voucher 35k' },
+                      { points: 500, value: 60000, label: 'Voucher 60k' }
+                    ].map((pkg) => {
+                      const canRedeem = (profile?.points || 0) >= pkg.points;
+                      return (
+                        <div 
+                          key={pkg.points} 
+                          className={`p-3 border flex items-center justify-between transition-colors ${
+                            canRedeem 
+                              ? 'border-[#2D5A27]/20 bg-[#2D5A27]/5 hover:bg-[#2D5A27]/10' 
+                              : 'border-stone-105 bg-stone-50/50 opacity-70'
+                          }`}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-black uppercase tracking-wider text-brand-charcoal">
+                              {pkg.label}
+                            </p>
+                            <p className="text-[9px] text-brand-muted font-mono">
+                              Yêu cầu: {pkg.points} điểm | Hạn dùng 30 ngày
+                            </p>
+                          </div>
+                          <button
+                            disabled={!canRedeem || redeemingOption !== null}
+                            onClick={() => handleRedeemPoints(pkg.points)}
+                            className={`px-3 py-2 text-[9px] font-black tracking-widest uppercase transition-all rounded-none ${
+                              canRedeem 
+                                ? 'bg-[#2D5A27] text-white hover:bg-[#1D4A17] cursor-pointer' 
+                                : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {redeemingOption === pkg.points ? 'Đang đổi...' : 'Đổi Quà'}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

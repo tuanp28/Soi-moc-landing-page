@@ -12,9 +12,22 @@ import { ArrowRight, Phone, Award } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
+  const [productsList, setProductsList] = React.useState(products);
+
+  React.useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.products) {
+          setProductsList(data.products);
+        }
+      })
+      .catch((err) => console.error('Error loading products for homepage:', err));
+  }, []);
+
   // Select main corn products for the homepage highlight
-  const featuredProducts = products.filter(p => p.category === 'corn');
-  const specialtyProducts = products.filter(p => p.category === 'specialty');
+  const featuredProducts = productsList.filter(p => p.category === 'corn');
+  const specialtyProducts = productsList.filter(p => p.category === 'specialty');
 
   return (
     <div className="bg-brand-cream text-brand-charcoal min-h-screen font-sans">

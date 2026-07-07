@@ -101,7 +101,11 @@ export default function RegisterPage() {
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Có lỗi xảy ra khi tạo tài khoản.');
+      let message = err.message || 'Có lỗi xảy ra khi tạo tài khoản.';
+      if (message.includes('Error sending confirmation email')) {
+        message = 'Không thể gửi email xác nhận do cấu hình SMTP của hệ thống bị lỗi (Sai tài khoản/mật khẩu gửi thư). Vui lòng liên hệ quản trị viên.';
+      }
+      setErrorMsg(message);
       setLoading(false);
     }
   };

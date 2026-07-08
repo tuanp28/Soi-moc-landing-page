@@ -7,31 +7,39 @@ const SEPAY_WEBHOOK_SECRET = process.env.SEPAY_WEBHOOK_SECRET || 'whsec_6WeAGUI2
 
 export async function POST(request: Request) {
   try {
-    // 1. Signature Header Check
-    const signature = request.headers.get('x-sepay-signature');
-    if (!signature) {
-      console.error('[SePay Webhook] Missing x-sepay-signature header');
-      return NextResponse.json({ success: false, error: 'Unauthorized: Missing signature header' }, { status: 401 });
+    // 1. Signature & Timestamp Headers Check
+    const signatureHeader = request.headers.get('x-sepay-signature');
+    const timestampHeader = request.headers.get('x-sepay-timestamp');
+    
+    if (!signatureHeader || !timestampHeader) {
+      console.error('[SePay Webhook] Missing signature or timestamp header');
+      return NextResponse.json({ success: false, error: 'Unauthorized: Missing required headers' }, { status: 401 });
     }
 
     // 2. Read raw text body for signature computation
     const rawBody = await request.text();
 
-    // 3. Compute HMAC-SHA256 Hash
-    const computedSignature = crypto
+    // 3. Construct signing string: {timestamp}.{raw_body}
+    const dataToVerify = `${timestampHeader}.${rawBody}`;
+
+    // 4. Compute HMAC-SHA256 Hash
+    const computedHash = crypto
       .createHmac('sha256', SEPAY_WEBHOOK_SECRET)
-      .update(rawBody)
+      .update(dataToVerify)
       .digest('hex');
 
-    // 4. Secure comparison of signatures
-    if (signature.length !== computedSignature.length) {
+    // 5. SePay signature format is "sha256={hash}"
+    const expectedSignature = `sha256=${computedHash}`;
+
+    // 6. Secure comparison of signatures
+    if (signatureHeader.length !== expectedSignature.length) {
       console.error('[SePay Webhook] Signature length mismatch');
       return NextResponse.json({ success: false, error: 'Unauthorized: Invalid signature' }, { status: 403 });
     }
 
-    const signatureBuffer = Buffer.from(signature, 'hex');
-    const computedBuffer = Buffer.from(computedSignature, 'hex');
-    const isValid = crypto.timingSafeEqual(signatureBuffer, computedBuffer);
+    const signatureBuffer = Buffer.from(signatureHeader);
+    const expectedBuffer = Buffer.from(expectedSignature);
+    const isValid = crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
 
     if (!isValid) {
       console.error('[SePay Webhook] Signature verification failed');

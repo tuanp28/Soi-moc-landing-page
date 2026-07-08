@@ -1,0 +1,11 @@
+[
+  {
+    "id": "NOTIF-753150",
+    "type": "email",
+    "recipient": "tuanphamabcxyz123@gmail.com",
+    "subject": "[Sợi Mộc] Đặt hàng thành công - Đơn hàng #SM-489292",
+    "content": "Gửi Email HTML đến tuanphamabcxyz123@gmail.com",
+    "orderId": "SM-489292",
+    "timestamp": "2026-07-08T13:22:13.175Z"
+  }
+]

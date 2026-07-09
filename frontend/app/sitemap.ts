@@ -4,7 +4,7 @@ import { policies } from '@/app/data/policies';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Domain chính của website. Có thể cấu hình qua biến môi trường NEXT_PUBLIC_APP_URL
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://soimoc.vn';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://soimoc.com';
 
   // 1. Các trang tĩnh công khai
   const staticRoutes = ['', '/products', '/about', '/contact', '/lucky-wheel'].map((route) => ({

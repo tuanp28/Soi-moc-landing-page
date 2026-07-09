@@ -1,5 +1,13 @@
 [
   {
+    "id": "NOTIF-887685",
+    "type": "sms",
+    "recipient": "0353891174",
+    "content": "Gửi SMS/Zalo đến số điện thoại 0353891174 với nội dung: \"[Sợi Mộc] Trạng thái đơn hàng SM-314040 đã chuyển sang Đã thanh toán.\"",
+    "orderId": "SM-314040",
+    "timestamp": "2026-07-08T18:49:14.481Z"
+  },
+  {
     "id": "NOTIF-753150",
     "type": "email",
     "recipient": "tuanphamabcxyz123@gmail.com",

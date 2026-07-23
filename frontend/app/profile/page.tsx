@@ -58,6 +58,7 @@ export default function ProfilePage() {
   const [redeemError, setRedeemError] = useState<string | null>(null);
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showAvatarPreview, setShowAvatarPreview] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,6 +71,21 @@ export default function ProfilePage() {
 
     setUploadingAvatar(true);
     try {
+      // 1. Clean up old avatar if it resides in Supabase avatars bucket
+      const oldAvatarUrl = profile?.avatarUrl || user?.user_metadata?.avatar_url;
+      if (oldAvatarUrl && oldAvatarUrl.includes('/storage/v1/object/public/avatars/')) {
+        try {
+          const urlParts = oldAvatarUrl.split('/');
+          const oldFileName = urlParts[urlParts.length - 1];
+          if (oldFileName) {
+            await supabase.storage.from('avatars').remove([oldFileName]);
+            console.log('Successfully deleted old avatar file:', oldFileName);
+          }
+        } catch (delError) {
+          console.error('Error deleting old avatar:', delError);
+        }
+      }
+
       const fileExt = file.name.split('.').pop();
       const randomName = Math.random().toString(36).substring(2);
       const fileName = `${user?.id || 'user'}_${randomName}_${Date.now()}.${fileExt}`;
@@ -480,23 +496,50 @@ export default function ProfilePage() {
                 {uploadingAvatar ? (
                   <Loader2 className="w-6 h-6 animate-spin text-[#2D5A27]" />
                 ) : avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                  <>
+                    <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                    {/* Hover overlay with dual options (View / Change) */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-200 select-none">
+                      <button
+                        type="button"
+                        onClick={() => setShowAvatarPreview(true)}
+                        className="p-1 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all cursor-pointer"
+                        title="Xem ảnh đại diện"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                      <label
+                        className="p-1 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all cursor-pointer"
+                        title="Đổi ảnh đại diện"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          disabled={uploadingAvatar}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </>
                 ) : (
-                  <UserIcon className="w-8 h-8" />
+                  <>
+                    <UserIcon className="w-8 h-8" />
+                    {/* Camera icon hover overlay for upload only */}
+                    <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white text-[8px] font-black uppercase tracking-wider select-none">
+                      <Camera className="w-4 h-4 mb-0.5" />
+                      <span>Đổi ảnh</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        disabled={uploadingAvatar}
+                        className="hidden"
+                      />
+                    </label>
+                  </>
                 )}
-                
-                {/* Camera icon hover overlay */}
-                <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white text-[8px] font-black uppercase tracking-wider select-none">
-                  <Camera className="w-4 h-4 mb-0.5" />
-                  <span>Đổi ảnh</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    disabled={uploadingAvatar}
-                    className="hidden"
-                  />
-                </label>
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-[#1A1A1A] font-serif uppercase">
@@ -1502,6 +1545,73 @@ export default function ProfilePage() {
               >
                 ĐÓNG
               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal xem ảnh đại diện */}
+      <AnimatePresence>
+        {showAvatarPreview && avatarUrl && (
+          <div 
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-5 backdrop-blur-xs select-none"
+            onClick={() => setShowAvatarPreview(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#FAF6EE] border border-[#2D5A27]/10 w-full max-w-sm p-6 relative overflow-hidden shadow-2xl flex flex-col items-center gap-5 rounded-xs"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2D5A27] via-[#C8953A] to-[#2D5A27]" />
+              
+              <div className="flex justify-between items-center w-full pb-2.5 border-b border-stone-200/60">
+                <h4 className="font-serif text-sm font-bold text-stone-900 uppercase tracking-wider">
+                  Ảnh đại diện của bạn
+                </h4>
+                <button
+                  onClick={() => setShowAvatarPreview(false)}
+                  className="p-1 px-2.5 text-stone-400 hover:text-stone-900 border border-transparent hover:border-stone-200 transition-all cursor-pointer font-extrabold text-[10px] tracking-widest uppercase font-mono"
+                >
+                  ĐÓNG
+                </button>
+              </div>
+
+              <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-[#2D5A27]/25 shadow-lg bg-stone-100 flex items-center justify-center">
+                <img 
+                  src={avatarUrl} 
+                  alt="Avatar preview" 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+
+              <div className="flex gap-3.5 pt-2 w-full justify-center">
+                <a
+                  href={avatarUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#2D5A27] hover:bg-[#1f3e1b] text-white font-extrabold text-[10px] tracking-widest uppercase transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Xem ảnh gốc
+                </a>
+                <label
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#2D5A27]/20 hover:bg-[#2D5A27]/5 text-[#2D5A27] font-extrabold text-[10px] tracking-widest uppercase transition-colors cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Đổi ảnh mới
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      setShowAvatarPreview(false);
+                      handleAvatarUpload(e);
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </motion.div>
           </div>
         )}

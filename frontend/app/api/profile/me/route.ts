@@ -112,3 +112,39 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized: Missing token' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+
+    const supabaseServer = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+      },
+    });
+
+    const { data: { user }, error } = await supabaseServer.auth.getUser(token);
+    if (error || !user) {
+      return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { avatarUrl } = body;
+
+    const updatedProfile = await prisma.profile.update({
+      where: { id: user.id },
+      data: {
+        avatarUrl: avatarUrl || null
+      }
+    });
+
+    return NextResponse.json({ success: true, profile: updatedProfile });
+  } catch (err: any) {
+    console.error('Error in PUT /api/profile/me:', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

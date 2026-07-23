@@ -4,11 +4,16 @@ import React from 'react';
 import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { useCart } from '../context/CartContext';
+
 export const FloatingContact: React.FC = () => {
+  const { isCartOpen } = useCart();
   const phone = '0377159498';
   const facebookUrl = 'https://www.facebook.com/people/S%E1%BB%A3i-M%E1%BB%99c/100067446103740/';
   const tiktokUrl = 'https://www.tiktok.com/@soimoc201';
   const zaloUrl = 'https://zalo.me/0377159498';
+
+  if (isCartOpen) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none">

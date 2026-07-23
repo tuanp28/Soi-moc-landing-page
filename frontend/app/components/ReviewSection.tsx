@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
+import { Star, MessageSquare, ArrowRight, ShieldAlert, Sparkles, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/app/context/AuthContext';
+import { supabase } from '@/src/lib/supabase';
 import Link from 'next/link';
 
 interface Review {
@@ -12,6 +13,7 @@ interface Review {
   location: string;
   text: string;
   rating: number;
+  imagesJson?: string;
 }
 
 interface ReviewSectionProps {
@@ -30,6 +32,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [text, setText] = useState('');
   const [location, setLocation] = useState('');
+  const [images, setImages] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -52,7 +55,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
 
   useEffect(() => {
     fetchReviews();
-  }, []);
+  }, [productId]);
 
   // Auto-play (auto-slide) every 1 minute (60,000ms)
   useEffect(() => {
@@ -92,6 +95,34 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
     }
 
     try {
+      // 1. Upload review images to Supabase Storage if selected
+      const uploadedUrls: string[] = [];
+      if (images.length > 0) {
+        for (const file of images) {
+          const fileExt = file.name.split('.').pop();
+          const randomName = Math.random().toString(36).substring(2);
+          const fileName = `${randomName}_${Date.now()}.${fileExt}`;
+          
+          const { error } = await supabase.storage
+            .from('reviews')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (error) {
+            throw new Error(`Lỗi tải ảnh lên: ${error.message}`);
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('reviews')
+            .getPublicUrl(fileName);
+
+          uploadedUrls.push(publicUrl);
+        }
+      }
+
+      // 2. Submit review to API
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: {
@@ -102,7 +133,8 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
           text,
           rating,
           location: location.trim(),
-          productId: productId || null
+          productId: productId || null,
+          images: uploadedUrls
         })
       });
 
@@ -113,6 +145,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
         setText('');
         setLocation('');
         setRating(5);
+        setImages([]); // Clear selected images
         setCurrentPage(1);
         // Refresh reviews list
         await fetchReviews();
@@ -124,8 +157,8 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
       } else {
         setErrorMsg(data.error || 'Có lỗi xảy ra khi gửi đánh giá.');
       }
-    } catch (err) {
-      setErrorMsg('Lỗi hệ thống khi gửi đánh giá. Vui lòng thử lại sau.');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Lỗi hệ thống khi gửi đánh giá. Vui lòng thử lại sau.');
     } finally {
       setSubmitting(false);
     }
@@ -259,6 +292,51 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
                     </div>
                   </div>
 
+                  {/* Image attachment input */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black tracking-widest text-[#5A5A5A] uppercase font-mono block">
+                      Đính kèm hình ảnh (Tối đa 3 ảnh, mỗi ảnh tối đa 5MB)
+                    </label>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {images.map((img, idx) => (
+                        <div key={idx} className="relative w-16 h-16 border border-[#2D5A27]/25 flex items-center justify-center bg-stone-50 group overflow-hidden">
+                          <img src={URL.createObjectURL(img)} alt="preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setImages(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 w-5 h-5 bg-rose-500 hover:bg-rose-600 text-white rounded-full flex items-center justify-center text-xs font-black shadow-md cursor-pointer transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                      
+                      {images.length < 3 && (
+                        <label className="w-16 h-16 border border-dashed border-[#2D5A27]/30 hover:border-[#2D5A27] flex flex-col items-center justify-center bg-[#F9F4EC]/20 cursor-pointer transition-colors text-stone-400 hover:text-[#2D5A27] select-none">
+                          <Camera className="w-5 h-5 mb-0.5" />
+                          <span className="text-[8px] font-black uppercase tracking-wider">Thêm ảnh</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files || []);
+                              const allowedNewCount = 3 - images.length;
+                              const newFiles = files
+                                .slice(0, allowedNewCount)
+                                .filter(f => f.size <= 5242880); // 5MB limit
+                              if (newFiles.length < files.length) {
+                                alert("Bạn chỉ được chọn tối đa 3 ảnh và dung lượng mỗi ảnh không quá 5MB.");
+                              }
+                              setImages(prev => [...prev, ...newFiles]);
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Submit button */}
                   <div className="flex justify-end pt-2">
                     <button
@@ -291,55 +369,87 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
         ) : (
           <div className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {reviews.slice((currentPage - 1) * 3, currentPage * 3).map((review, idx) => (
-                <motion.div
-                  key={review.id || `${currentPage}-${idx}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: (idx % 3) * 0.15 }}
-                  className="bg-white border border-brand-green/10 p-8 flex flex-col justify-between relative group hover:border-brand-green/30 transition-all hover:shadow-md"
-                >
-                  {/* Quote Icon in background */}
-                  <div className="absolute right-6 top-6 text-brand-green-pale pointer-events-none">
-                    <MessageSquare className="w-8 h-8" />
-                  </div>
+              {reviews.slice((currentPage - 1) * 3, currentPage * 3).map((review, idx) => {
+                let imageUrls: string[] = [];
+                try {
+                  if (review.imagesJson) {
+                    imageUrls = JSON.parse(review.imagesJson);
+                  }
+                } catch (e) {
+                  console.error("Failed to parse review images:", e);
+                }
 
-                  <div>
-                    {/* Stars */}
-                    <div className="flex gap-1 mb-6">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />
-                      ))}
-                      {[...Array(5 - review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-stone-200" />
-                      ))}
+                return (
+                  <motion.div
+                    key={review.id || `${currentPage}-${idx}`}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.5, delay: (idx % 3) * 0.15 }}
+                    className="bg-white border border-brand-green/10 p-8 flex flex-col justify-between relative group hover:border-brand-green/30 transition-all hover:shadow-md"
+                  >
+                    {/* Quote Icon in background */}
+                    <div className="absolute right-6 top-6 text-brand-green-pale pointer-events-none">
+                      <MessageSquare className="w-8 h-8" />
                     </div>
 
-                    {/* Comment Text */}
-                    <p className="text-brand-muted text-sm leading-relaxed mb-8 font-medium italic">
-                      "{review.text}"
-                    </p>
-                  </div>
-
-                  {/* Customer Meta */}
-                  <div className="flex items-center gap-4 border-t border-brand-green/5 pt-6">
-                    {/* Avatar Badge */}
-                    <div className="w-10 h-10 bg-[#2D5A27] text-white font-extrabold text-sm flex items-center justify-center font-sans select-none">
-                      {getInitials(review.name)}
-                    </div>
-                    
                     <div>
-                      <h4 className="font-extrabold text-sm text-brand-charcoal tracking-wide uppercase font-sans">
-                        {review.name}
-                      </h4>
-                      <p className="text-[10px] text-brand-muted/60 font-bold uppercase tracking-widest font-mono">
-                        {review.location}
+                      {/* Stars */}
+                      <div className="flex gap-1 mb-6">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />
+                        ))}
+                        {[...Array(5 - review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-stone-200" />
+                        ))}
+                      </div>
+
+                      {/* Comment Text */}
+                      <p className="text-brand-muted text-sm leading-relaxed mb-4 font-medium italic">
+                        "{review.text}"
                       </p>
+
+                      {/* Image attachments list */}
+                      {imageUrls && imageUrls.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {imageUrls.map((url, i) => (
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              key={i}
+                              className="relative w-14 h-14 border border-zinc-100 overflow-hidden cursor-zoom-in group-hover:border-brand-green/20"
+                            >
+                              <img
+                                src={url}
+                                alt={`Ảnh đánh giá của ${review.name}`}
+                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+
+                    {/* Customer Meta */}
+                    <div className="flex items-center gap-4 border-t border-brand-green/5 pt-6">
+                      {/* Avatar Badge */}
+                      <div className="w-10 h-10 bg-[#2D5A27] text-white font-extrabold text-sm flex items-center justify-center font-sans select-none">
+                        {getInitials(review.name)}
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-extrabold text-sm text-brand-charcoal tracking-wide uppercase font-sans">
+                          {review.name}
+                        </h4>
+                        <p className="text-[10px] text-brand-muted/60 font-bold uppercase tracking-widest font-mono">
+                          {review.location}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Pagination Controls */}

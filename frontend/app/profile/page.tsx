@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { ProtectedRoute } from '@/app/components/ProtectedRoute';
 import { supabase } from '@/src/lib/supabase';
-import { LogOut, User as UserIcon, Calendar, Mail, ShieldCheck, ShoppingBag, Eye, Award, ExternalLink, Gift, Lock, CheckCircle, Copy, Sparkles, Clock, Crown, Gem } from 'lucide-react';
+import { LogOut, User as UserIcon, Calendar, Mail, ShieldCheck, ShoppingBag, Eye, Award, ExternalLink, Gift, Lock, CheckCircle, Copy, Sparkles, Clock, Crown, Gem, Camera, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Order {
@@ -57,12 +57,71 @@ export default function ProfilePage() {
   const [redeemSuccessVoucher, setRedeemSuccessVoucher] = useState<string | null>(null);
   const [redeemError, setRedeemError] = useState<string | null>(null);
 
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2097152) {
+      alert('Dung lượng ảnh đại diện không được vượt quá 2MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const randomName = Math.random().toString(36).substring(2);
+      const fileName = `${user?.id || 'user'}_${randomName}_${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw new Error(`Lỗi tải lên: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const response = await fetch('/api/profile/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          avatarUrl: publicUrl
+        })
+      });
+
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.error || 'Cập nhật ảnh đại diện thất bại.');
+      }
+
+      await refreshProfile();
+      alert('Cập nhật ảnh đại diện thành công!');
+    } catch (err: any) {
+      console.error('Error uploading avatar:', err);
+      alert(err.message || 'Có lỗi xảy ra khi cập nhật ảnh đại diện.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   // Parse user metadata & date details
   const fullName = profile?.fullName || user?.user_metadata?.full_name || 'Khách hàng Sợi Mộc';
   const email = profile?.email || user?.email || 'N/A';
   const userId = profile?.id || user?.id || 'N/A';
   const role = profile?.role || 'customer';
   const vipLevel = profile?.vipLevel || 'normal';
+  const avatarUrl = profile?.avatarUrl || user?.user_metadata?.avatar_url || null;
 
   // Calculate effective registration date based on simulation state
   const effectiveCreatedAt = (simulatedDaysAgo > 0)
@@ -417,8 +476,27 @@ export default function ProfilePage() {
           {/* Header row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#2D5A27]/10 pb-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#2D5A27]/10 border border-[#2D5A27]/20 flex items-center justify-center text-[#2D5A27]">
-                <UserIcon className="w-7 h-7" />
+              <div className="relative w-16 h-16 rounded-full border-2 border-[#2D5A27]/25 overflow-hidden group bg-[#2D5A27]/5 flex items-center justify-center text-[#2D5A27]">
+                {uploadingAvatar ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-[#2D5A27]" />
+                ) : avatarUrl ? (
+                  <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-8 h-8" />
+                )}
+                
+                {/* Camera icon hover overlay */}
+                <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white text-[8px] font-black uppercase tracking-wider select-none">
+                  <Camera className="w-4 h-4 mb-0.5" />
+                  <span>Đổi ảnh</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    disabled={uploadingAvatar}
+                    className="hidden"
+                  />
+                </label>
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-[#1A1A1A] font-serif uppercase">

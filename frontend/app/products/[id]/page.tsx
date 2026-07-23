@@ -285,13 +285,14 @@ export default function ProductDetailPage({ params }: PageProps) {
                     <button
                       key={sz.weight}
                       onClick={() => setSelectedWeight(sz.weight)}
-                      className={`py-4 px-6 border text-xs font-extrabold tracking-wider transition-all duration-300 flex justify-between items-center cursor-pointer rounded-none ${
+                      className={`py-4 px-6 border text-xs font-extrabold tracking-wider transition-all duration-300 flex justify-center items-center gap-2 cursor-pointer rounded-none ${
                         selectedWeight === sz.weight
                           ? 'border-brand-green bg-brand-green-pale/50 text-brand-green'
                           : 'border-brand-green/10 bg-white text-brand-muted hover:border-brand-green/30 hover:text-brand-charcoal'
                       }`}
                     >
                       <span>TÚI {sz.weight.toUpperCase()}</span>
+                      <span className="text-brand-muted/40">-</span>
                       <span className={selectedWeight === sz.weight ? 'text-brand-green font-black' : 'text-brand-muted'}>
                         {sz.priceStr}
                       </span>

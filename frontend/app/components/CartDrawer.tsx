@@ -108,6 +108,20 @@ export const CartDrawer: React.FC = () => {
   const [shippingFee, setShippingFee] = useState(40000); // Default to 40k
   const [estimatedDays, setEstimatedDays] = useState('3-5 ngày');
 
+  // States for dynamic address dropdowns (Provinces Open API)
+  const [provinces, setProvinces] = useState<{ code: number; name: string }[]>([]);
+  const [districts, setDistricts] = useState<{ code: number; name: string }[]>([]);
+  const [wards, setWards] = useState<{ code: number; name: string }[]>([]);
+
+  const [selProvinceCode, setSelProvinceCode] = useState<string>('');
+  const [selDistrictCode, setSelDistrictCode] = useState<string>('');
+  const [selWardCode, setSelWardCode] = useState<string>('');
+
+  const [selProvinceName, setSelProvinceName] = useState<string>('');
+  const [selDistrictName, setSelDistrictName] = useState<string>('');
+  const [selWardName, setSelWardName] = useState<string>('');
+  const [streetAddress, setStreetAddress] = useState('');
+
   // Fetch shipping rates from Supabase on mount
   useEffect(() => {
     const fetchShippingRates = async () => {
@@ -162,6 +176,110 @@ export const CartDrawer: React.FC = () => {
                  { shipping_fee: 40000, estimated_days: '3-5 ngày' };
     setShippingFee(Number(rate.shipping_fee));
     setEstimatedDays(rate.estimated_days);
+  };
+
+  // Fetch provinces on demand when checkout form is shown
+  useEffect(() => {
+    if (checkoutStep === 'form' && provinces.length === 0) {
+      const fetchProvinces = async () => {
+        try {
+          const res = await fetch('https://provinces.open-api.vn/api/p/');
+          if (res.ok) {
+            const data = await res.json();
+            setProvinces(data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch provinces:', err);
+        }
+      };
+      fetchProvinces();
+    }
+  }, [checkoutStep, provinces.length]);
+
+  const handleProvinceSelect = async (provCode: string) => {
+    setSelProvinceCode(provCode);
+    setSelDistrictCode('');
+    setSelWardCode('');
+    setDistricts([]);
+    setWards([]);
+    setSelProvinceName('');
+    setSelDistrictName('');
+    setSelWardName('');
+    
+    if (!provCode) {
+      handleProvinceChange('');
+      return;
+    }
+    const prov = provinces.find(p => String(p.code) === provCode);
+    if (!prov) return;
+    setSelProvinceName(prov.name);
+
+    // Map to DB provinceName for shipping fee
+    let mappedProv = 'Các tỉnh khác';
+    if (prov.name.includes('Hà Nội')) {
+      mappedProv = 'Hà Nội';
+    } else if (prov.name.includes('Hồ Chí Minh')) {
+      mappedProv = 'TP Hồ Chí Minh';
+    } else if (prov.name.includes('Đà Nẵng')) {
+      mappedProv = 'Đà Nẵng';
+    }
+    handleProvinceChange(mappedProv);
+
+    try {
+      const res = await fetch(`https://provinces.open-api.vn/api/p/${provCode}?depth=2`);
+      if (res.ok) {
+        const data = await res.json();
+        setDistricts(data.districts || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch districts:', err);
+    }
+  };
+
+  const handleDistrictSelect = async (distCode: string) => {
+    setSelDistrictCode(distCode);
+    setSelWardCode('');
+    setWards([]);
+    setSelDistrictName('');
+    setSelWardName('');
+
+    if (!distCode) return;
+    const dist = districts.find(d => String(d.code) === distCode);
+    if (!dist) return;
+    setSelDistrictName(dist.name);
+
+    // Special shipping rate logic for Thạch Thất or Quốc Oai
+    if (selProvinceName.includes('Hà Nội')) {
+      if (dist.name.includes('Thạch Thất')) {
+        handleProvinceChange('Thạch Thất (Hà Nội)');
+      } else if (dist.name.includes('Quốc Oai')) {
+        handleProvinceChange('Quốc Oai (Hà Nội)');
+      } else {
+        handleProvinceChange('Hà Nội');
+      }
+    }
+
+    try {
+      const res = await fetch(`https://provinces.open-api.vn/api/d/${distCode}?depth=2`);
+      if (res.ok) {
+        const data = await res.json();
+        setWards(data.wards || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch wards:', err);
+    }
+  };
+
+  const handleWardSelect = (wardCode: string) => {
+    setSelWardCode(wardCode);
+    if (!wardCode) {
+      setSelWardName('');
+      return;
+    }
+    const ward = wards.find(w => String(w.code) === wardCode);
+    if (ward) {
+      setSelWardName(ward.name);
+    }
   };
 
   // Coupon states
@@ -350,9 +468,19 @@ export const CartDrawer: React.FC = () => {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !address || !selectedProvince) {
-      setErrorMsg('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
-      return;
+    
+    let finalAddress = address;
+    if (provinces.length > 0) {
+      if (!name || !phone || !selProvinceCode || !selDistrictCode || !selWardCode || !streetAddress) {
+        setErrorMsg('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
+        return;
+      }
+      finalAddress = `${streetAddress}, ${selWardName}, ${selDistrictName}, ${selProvinceName}`;
+    } else {
+      if (!name || !phone || !address || !selectedProvince) {
+        setErrorMsg('Vui lòng điền đầy đủ các thông tin bắt buộc (*).');
+        return;
+      }
     }
 
     const cleanPhone = phone.replace(/[\s().-]/g, '');
@@ -378,7 +506,7 @@ export const CartDrawer: React.FC = () => {
         body: JSON.stringify({
           customerName: name,
           customerPhone: phone,
-          customerAddress: address,
+          customerAddress: finalAddress,
           customerNote: note || null,
           totalAmount: grandTotal,
           cartItems: cart.map(item => ({
@@ -488,7 +616,7 @@ ${comboDiscount > 0 ? `🎉 Ưu đãi Combo (Giảm 5%): -${comboDiscount.toLoca
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-black z-50 cursor-pointer"
+            className="fixed inset-0 bg-black z-[100] cursor-pointer"
           />
 
           {/* Drawer Panel */}
@@ -497,7 +625,7 @@ ${comboDiscount > 0 ? `🎉 Ưu đãi Combo (Giảm 5%): -${comboDiscount.toLoca
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed right-0 top-0 bottom-0 w-full md:max-w-md bg-zinc-950 border-l border-zinc-800 text-white z-50 flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 bottom-0 w-full md:max-w-[550px] bg-zinc-950 border-l border-zinc-800 text-white z-[100] flex flex-col shadow-2xl"
           >
             {/* Header */}
             <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
@@ -663,40 +791,130 @@ ${comboDiscount > 0 ? `🎉 Ưu đãi Combo (Giảm 5%): -${comboDiscount.toLoca
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
-                          Tỉnh / Thành Phố *
-                        </label>
-                        <div className="relative">
-                          <select
-                            required
-                            value={selectedProvince}
-                            onChange={(e) => handleProvinceChange(e.target.value)}
-                            className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10"
-                          >
-                            <option value="">-- Chọn Tỉnh / Thành Phố --</option>
-                            {VIETNAM_PROVINCES.map((prov) => (
-                              <option key={prov} value={prov} className="bg-zinc-900 text-white">
-                                {prov}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                      {provinces.length > 0 ? (
+                        <>
+                          {/* Tỉnh / Thành Phố */}
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Tỉnh / Thành Phố *
+                            </label>
+                            <div className="relative">
+                              <select
+                                required
+                                value={selProvinceCode}
+                                onChange={(e) => handleProvinceSelect(e.target.value)}
+                                className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10"
+                              >
+                                <option value="">-- Chọn Tỉnh / Thành Phố --</option>
+                                {provinces.map((prov) => (
+                                  <option key={prov.code} value={prov.code} className="bg-zinc-900 text-white">
+                                    {prov.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
 
-                      <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
-                          Địa Chỉ Chi Tiết *
-                        </label>
-                        <textarea
-                          required
-                          rows={3}
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Số nhà, ngõ/ngách, xã/phường, quận/huyện"
-                          className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none resize-none"
-                        />
-                      </div>
+                          {/* Quận / Huyện */}
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Quận / Huyện *
+                            </label>
+                            <div className="relative">
+                              <select
+                                required
+                                disabled={!selProvinceCode}
+                                value={selDistrictCode}
+                                onChange={(e) => handleDistrictSelect(e.target.value)}
+                                className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10 disabled:opacity-50"
+                              >
+                                <option value="">-- Chọn Quận / Huyện --</option>
+                                {districts.map((dist) => (
+                                  <option key={dist.code} value={dist.code} className="bg-zinc-900 text-white">
+                                    {dist.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Xã / Phường */}
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Xã / Phường *
+                            </label>
+                            <div className="relative">
+                              <select
+                                required
+                                disabled={!selDistrictCode}
+                                value={selWardCode}
+                                onChange={(e) => handleWardSelect(e.target.value)}
+                                className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10 disabled:opacity-50"
+                              >
+                                <option value="">-- Chọn Xã / Phường --</option>
+                                {wards.map((ward) => (
+                                  <option key={ward.code} value={ward.code} className="bg-zinc-900 text-white">
+                                    {ward.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Địa chỉ chi tiết */}
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Số nhà, tên đường *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={streetAddress}
+                              onChange={(e) => setStreetAddress(e.target.value)}
+                              placeholder="Ví dụ: Số 12, ngõ 86"
+                              className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Fallback original inputs */}
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Tỉnh / Thành Phố *
+                            </label>
+                            <div className="relative">
+                              <select
+                                required
+                                value={selectedProvince}
+                                onChange={(e) => handleProvinceChange(e.target.value)}
+                                className="w-full bg-[#111510] dark:bg-[#111510] border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23C8953A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.65rem_auto] bg-[right_1rem_center] bg-no-repeat pr-10"
+                              >
+                                <option value="">-- Chọn Tỉnh / Thành Phố --</option>
+                                {VIETNAM_PROVINCES.map((prov) => (
+                                  <option key={prov} value={prov} className="bg-zinc-900 text-white">
+                                    {prov}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                              Địa Chỉ Chi Tiết *
+                            </label>
+                            <textarea
+                              required
+                              rows={3}
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                              placeholder="Số nhà, ngõ/ngách, xã/phường, quận/huyện"
+                              className="w-full bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white rounded-none resize-none"
+                            />
+                          </div>
+                        </>
+                      )}
 
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">

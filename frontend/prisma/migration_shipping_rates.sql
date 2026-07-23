@@ -10,12 +10,12 @@ CREATE TABLE IF NOT EXISTS public.shipping_rates (
 
 -- 2. Seed data
 INSERT INTO public.shipping_rates (province_name, shipping_fee, estimated_days) VALUES
-('Hà Nội', 20000, '1-2 ngày'),
+('Hà Nội', 25000, '1-2 ngày'),
 ('Thạch Thất', 0, 'Trong ngày'),
 ('Quốc Oai', 0, 'Trong ngày'),
 ('TP Hồ Chí Minh', 35000, '3-4 ngày'),
-('Đà Nẵng', 35000, '3-4 ngày'),
-('Các tỉnh khác', 40000, '3-5 ngày')
+('Đà Nẵng', 35000, '2-3 ngày'),
+('Các tỉnh khác', 38000, '3-5 ngày')
 ON CONFLICT (province_name) DO UPDATE SET
     shipping_fee = EXCLUDED.shipping_fee,
     estimated_days = EXCLUDED.estimated_days;

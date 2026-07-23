@@ -222,7 +222,6 @@ export function AdminUserTab() {
               <option value="vip">VIP</option>
               <option value="staff">Staff</option>
               <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
 
@@ -324,7 +323,6 @@ export function AdminUserTab() {
                         <option value="vip">VIP</option>
                         <option value="staff">Staff</option>
                         <option value="manager">Manager</option>
-                        <option value="admin">Admin</option>
                       </select>
                     </td>
 

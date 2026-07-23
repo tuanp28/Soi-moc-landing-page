@@ -34,7 +34,13 @@ export const products: Product[] = [
     description: 'Sợi phở vàng óng tự nhiên từ ngô tẻ vùng cao, sấy lạnh 36h giữ trọn vẹn chất xơ và vitamin. Carb hấp thu chậm hỗ trợ tối ưu cho lối sống năng động và tập luyện.',
     details: 'Được chế biến từ hạt ngô tẻ thuần chủng trồng trên các hốc đá Cao Bằng. Áp dụng công nghệ nghiền cối đá thủy lực tốc độ chậm giúp bảo toàn lớp cám ngô giàu dinh dưỡng. Trải qua quy trình sấy lạnh khép kín 36 giờ, sợi phở ngô giữ được độ dai dẻo mộc mạc và hương thơm ngậy đặc trưng mà không cần bất cứ chất phụ gia nào.',
     image: '/images/pho-ngo-main.jpg',
-    images: ['/images/pho-ngo-main.jpg', '/images/pho-ngo-premium.jpg'],
+    images: [
+      '/images/pho-ngo-main.jpg',
+      '/images/pho-ngo-premium.jpg',
+      '/images/pho-ngo-detail-1.jpg',
+      '/images/pho-ngo-detail-2.jpg',
+      '/images/pho-ngo-detail-3.jpg'
+    ],
     features: ['100% Ngô bản địa Cao Bằng', 'Không chứa Gluten (Gluten-Free)', 'Carbohydrate phức hợp hấp thu chậm', 'Chỉ số đường huyết (GI) thấp'],
     cookingTime: '6 - 8 phút',
     nutrition: {

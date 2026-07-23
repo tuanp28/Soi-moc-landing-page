@@ -104,7 +104,7 @@ export async function GET(request: Request) {
 
 async function getShippingFeeForProvince(provinceName: string | null | undefined): Promise<{ shippingFee: number; estimatedDays: string }> {
   if (!provinceName) {
-    return { shippingFee: 40000, estimatedDays: '3-5 ngày' };
+    return { shippingFee: 38000, estimatedDays: '3-5 ngày' };
   }
   
   let searchName = provinceName;
@@ -140,12 +140,15 @@ async function getShippingFeeForProvince(provinceName: string | null | undefined
     return { shippingFee: 0, estimatedDays: 'Trong ngày' };
   }
   if (searchName === 'Hà Nội') {
-    return { shippingFee: 20000, estimatedDays: '1-2 ngày' };
+    return { shippingFee: 25000, estimatedDays: '1-2 ngày' };
   }
-  if (searchName === 'TP Hồ Chí Minh' || searchName === 'Đà Nẵng') {
+  if (searchName === 'TP Hồ Chí Minh') {
     return { shippingFee: 35000, estimatedDays: '3-4 ngày' };
   }
-  return { shippingFee: 40000, estimatedDays: '3-5 ngày' };
+  if (searchName === 'Đà Nẵng') {
+    return { shippingFee: 35000, estimatedDays: '2-3 ngày' };
+  }
+  return { shippingFee: 38000, estimatedDays: '3-5 ngày' };
 }
 
 export async function POST(request: Request) {

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { text, rating, location, productId } = body;
+    const { text, rating, location, productId, images } = body;
 
     if (!text || typeof text !== 'string' || text.trim() === '') {
       return NextResponse.json({ success: false, error: 'Nội dung đánh giá không được để trống.' }, { status: 400 });
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     });
 
     const name = profile?.fullName || user.user_metadata?.full_name || 'Khách hàng Sợi Mộc';
+    const imagesJson = images && Array.isArray(images) ? JSON.stringify(images) : '[]';
 
     // Create the review
     const review = await prisma.review.create({
@@ -69,7 +70,8 @@ export async function POST(request: Request) {
         text: text.trim(),
         rating: ratingVal,
         userId: user.id,
-        productId: productId || null
+        productId: productId || null,
+        imagesJson
       }
     });
 

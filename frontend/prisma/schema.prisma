@@ -56,6 +56,7 @@ model Review {
   rating    Int      @default(5)
   userId    String?
   productId String?  @map("product_id")
+  imagesJson String   @default("[]") @map("images_json")
   createdAt DateTime @default(now())
 }
 

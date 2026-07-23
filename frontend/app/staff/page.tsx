@@ -126,9 +126,9 @@ function StaffDashboard() {
     }
   }, [selectedOrder?.id]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (silent = false) => {
     if (!session) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const response = await fetch('/api/orders', {
         headers: {
@@ -148,17 +148,26 @@ function StaffDashboard() {
         throw new Error('Failed to fetch from API');
       }
     } catch (err) {
-      console.warn('Backend orders query failed, displaying mock admin data:', err);
-      setOrders(mockOrders);
-      setIsUsingMock(true);
+      console.warn('Backend orders query failed, displaying mock data:', err);
+      if (!silent) {
+        setOrders(mockOrders);
+        setIsUsingMock(true);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (session) {
       fetchOrders();
+
+      // Tự động tải lại danh sách đơn hàng ngầm (silent) mỗi 5 giây để cập nhật trạng thái QR tức thời
+      const intervalId = setInterval(() => {
+        fetchOrders(true);
+      }, 5000);
+
+      return () => clearInterval(intervalId);
     }
   }, [session]);
 
@@ -321,7 +330,7 @@ function StaffDashboard() {
           </div>
 
           <button
-            onClick={fetchOrders}
+            onClick={() => fetchOrders()}
             className="w-fit flex items-center justify-center gap-2 px-5 py-3 border border-[#2D5A27]/20 hover:border-[#2D5A27] bg-white dark:bg-stone-900 text-xs font-black tracking-widest uppercase hover:shadow-xs active:scale-95 transition-all cursor-pointer rounded-none text-[#1A1A1A] dark:text-stone-200"
           >
             <RefreshCw className="w-3.5 h-3.5" />

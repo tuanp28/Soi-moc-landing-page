@@ -18,7 +18,7 @@ export const Preloader: React.FC = () => {
     // Disable body scroll while loading
     document.body.style.overflow = 'hidden';
 
-    const duration = 2500; // 2.5 seconds total loading duration
+    const duration = 800; // 0.8 seconds total loading duration
     const intervalTime = 30; // Smooth updates every 30ms
     const steps = duration / intervalTime;
     let currentStep = 0;
